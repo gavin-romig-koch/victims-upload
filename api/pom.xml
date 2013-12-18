@@ -4,63 +4,17 @@
 	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>com.redhat.cloudconsole</groupId>
+		<groupId>com.redhat.chrometwo</groupId>
 		<version>1.0</version>
 		<artifactId>cloud</artifactId>
 	</parent>
-	<groupId>com.redhat.cloudconsole.api</groupId>
+	<groupId>com.redhat.chrometwo.api</groupId>
 	<artifactId>api</artifactId>
 	<packaging>war</packaging>
 	<name>cloud console REST API subproject</name>
 	<dependencies>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>14.0.1</version>
-        </dependency>
-        <dependency>
-            <groupId>de.undercouch</groupId>
-            <artifactId>bson4jackson</artifactId>
-            <version>2.2.3</version>
-            <!--Version 2.2 will only be compatible with the yet to be released jongo .5-->
-            <!--<version>2.2.3</version>-->
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-joda</artifactId>
-            <version>2.2.3</version>
-            <!--<version>2.3.0</version>-->
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-core</artifactId>
-            <version>2.2.3</version>
-            <!--<version>2.3.0</version>-->
-        </dependency>
 
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>2.2.3</version>
-            <!--<version>2.3.0</version>-->
-        </dependency>
 
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-annotations</artifactId>
-            <version>2.2.3</version>
-            <!--<version>2.3.0</version>-->
-        </dependency>
-        <dependency>
-            <groupId>org.jongo</groupId>
-            <artifactId>jongo</artifactId>
-            <version>1.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.mongodb</groupId>
-            <artifactId>mongo-java-driver</artifactId>
-            <version>2.11.3</version>
-        </dependency>
         <dependency> 
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>

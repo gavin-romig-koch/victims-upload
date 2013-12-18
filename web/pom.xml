@@ -3,15 +3,15 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>com.redhat.cloudconsole</groupId>
+    <groupId>com.redhat.chrometwo</groupId>
     <artifactId>cloud</artifactId>
     <version>1.0</version>
   </parent>
-  <groupId>com.redhat.cloudconsole.web</groupId>
+  <groupId>com.redhat.chrometwo.web</groupId>
   <artifactId>web</artifactId>
   <version>0.9</version>
   <packaging>war</packaging>
-  <name>cloud console web subproject</name>
+  <name>chrometwo web subproject</name>
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
