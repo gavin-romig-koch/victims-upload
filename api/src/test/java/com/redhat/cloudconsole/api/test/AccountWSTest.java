@@ -5,7 +5,7 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import com.redhat.cloudconsole.api.services.AccountWS;
+import com.redhat.chrometwo.api.services.AccountWS;
 
 public class AccountWSTest extends AccountWS {
 

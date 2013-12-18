@@ -1,5 +1,0 @@
-NameError: .transition is undefined in /Volumes/Optibay/Source/cloud/web/src/main/webapp/resources/js/bower_components/bootstrap/less/thumbnails.less on line 15, column 3:
-14   border-radius: @thumbnail-border-radius;
-15   .transition(all .2s ease-in-out);
-16 
-
