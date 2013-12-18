@@ -1,0 +1,5 @@
+NameError: variable @caret-width-base is undefined in /Volumes/Optibay/Source/cloud/web/src/main/webapp/resources/js/bower_components/bootstrap/less/dropdowns.less on line 13, column 17:
+12   vertical-align: middle;
+13   border-top:   @caret-width-base solid;
+14   border-right: @caret-width-base solid transparent;
+

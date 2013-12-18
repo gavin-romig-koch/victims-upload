@@ -1,0 +1,14 @@
+/target
+target
+.settings/*
+!.settings/.jsdtscope
+.project
+.classpath
+api/.settings/*
+web/.settings/*
+
+# Adding Intellij ignore paths
+.idea/
+cloud.iml
+web/web.iml
+api/api.iml

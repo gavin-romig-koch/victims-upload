@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jboss:jboss-web xmlns:javaee="http://java.sun.com/xml/ns/javaee"
+	xmlns:jboss="http://www.jboss.com/xml/ns/javaee" 
+	xmlns:xml="http://www.w3.org/XML/1998/namespace"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.jboss.com/xml/ns/javaee http://www.jboss.org/j2ee/schema/jboss-web_6_0.xsd "
+	version="6.0">   
+	<jboss:security-domain>gss-cert</jboss:security-domain>
+</jboss:jboss-web>

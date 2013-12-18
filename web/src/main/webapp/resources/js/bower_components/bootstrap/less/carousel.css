@@ -1,0 +1,5 @@
+NameError: .transition is undefined in /Volumes/Optibay/Source/cloud/web/src/main/webapp/resources/js/bower_components/bootstrap/less/carousel.less on line 19, column 5:
+18     position: relative;
+19     .transition(.6s ease-in-out left);
+20 
+

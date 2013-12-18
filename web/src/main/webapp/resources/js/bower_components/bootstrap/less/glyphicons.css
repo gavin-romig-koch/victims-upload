@@ -1,0 +1,5 @@
+NameError: variable @icon-font-path is undefined in /Volumes/Optibay/Source/cloud/web/src/main/webapp/resources/js/bower_components/bootstrap/less/glyphicons.less on line 13, column 8:
+12   font-family: 'Glyphicons Halflings';
+13   src: ~"url('@{icon-font-path}@{icon-font-name}.eot')";
+14   src: ~"url('@{icon-font-path}@{icon-font-name}.eot?#iefix') format('embedded-opentype')",
+

@@ -1,0 +1,5 @@
+NameError: variable @headings-font-family is undefined in /Volumes/Optibay/Source/cloud/web/src/main/webapp/resources/js/bower_components/bootstrap/less/type.less on line 11, column 16:
+10 .h1, .h2, .h3, .h4, .h5, .h6 {
+11   font-family: @headings-font-family;
+12   font-weight: @headings-font-weight;
+

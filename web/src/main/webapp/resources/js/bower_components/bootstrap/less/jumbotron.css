@@ -1,0 +1,5 @@
+NameError: variable @jumbotron-padding is undefined in /Volumes/Optibay/Source/cloud/web/src/main/webapp/resources/js/bower_components/bootstrap/less/jumbotron.less on line 7, column 12:
+6 .jumbotron {
+7   padding: @jumbotron-padding;
+8   margin-bottom: @jumbotron-padding;
+

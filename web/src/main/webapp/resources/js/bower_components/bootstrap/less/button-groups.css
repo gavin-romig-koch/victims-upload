@@ -1,0 +1,5 @@
+NameError: .clearfix is undefined in /Volumes/Optibay/Source/cloud/web/src/main/webapp/resources/js/bower_components/bootstrap/less/button-groups.less on line 40, column 3:
+39 .btn-toolbar {
+40   .clearfix();
+41 
+

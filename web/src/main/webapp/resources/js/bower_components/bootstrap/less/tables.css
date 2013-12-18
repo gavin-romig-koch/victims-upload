@@ -1,0 +1,5 @@
+NameError: variable @table-bg-active is undefined in /Volumes/Optibay/Source/cloud/web/src/main/webapp/resources/js/bower_components/bootstrap/less/tables.less on line 157, column 28:
+156 // Generate the contextual variants
+157 .table-row-variant(active; @table-bg-active);
+158 .table-row-variant(success; @state-success-bg);
+

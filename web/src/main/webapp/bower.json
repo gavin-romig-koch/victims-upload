@@ -1,0 +1,34 @@
+{
+  "name": "Red Hat PhD",
+  "version": "0.0.1",
+  "authors": [
+    "Samuel Mendenhall <smendenh@redhat.com>"
+  ],
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "resources/js/bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "3.0.3",
+    "d3": "3.3.11",
+    "requirejs": "~2.1.9",
+    "lodash": "~2.3.0",
+    "angular": "1.2.4",
+    "angular-route": "~1.2.4",
+    "angular-animate": "~1.2.4",
+    "angular-resource": "~1.2.4",
+    "momentjs": "~2.4.0",
+    "angular-bootstrap": "~0.6.0",
+    "toastr": "~2.0.1",
+    "nvd3": "~1.1.14-beta",
+    "angular-cookies": "1.2.4"
+  },
+  "resolutions": {
+    "d3": "3.3.11"
+  }
+}

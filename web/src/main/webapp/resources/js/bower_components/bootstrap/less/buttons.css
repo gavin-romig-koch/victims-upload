@@ -1,0 +1,5 @@
+NameError: variable @padding-base-vertical is undefined in /Volumes/Optibay/Source/cloud/web/src/main/webapp/resources/js/bower_components/bootstrap/less/buttons.less on line 19, column 16:
+18   white-space: nowrap;
+19   .button-size(@padding-base-vertical; @padding-base-horizontal; @font-size-base; @line-height-base; @border-radius-base);
+20   .user-select(none);
+

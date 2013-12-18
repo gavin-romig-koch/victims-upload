@@ -1,0 +1,94 @@
+
+<div class="row">
+  <div class="col-md-3">
+    <div>
+      <form role="form" class="form-inline">Group By:&nbsp;
+        <label class="radio-inline">
+          <input type="radio" ng-model="groupAccountBy" value="account"/>&nbsp;Account
+        </label>
+        <label class="radio-inline">
+          <input type="radio" ng-model="groupAccountBy" value="machine"/>&nbsp;Machine
+        </label>
+      </form>
+    </div>
+    <d3-tree id="account-tree" val="sharedProperties.accountTree"></d3-tree>
+  </div>
+  <div class="col-md-9">
+    <div ng-switch="" on="sharedProperties.uiSelection" class="animate-switch-container">
+      <div ng-switch-when="org" class="animate-switch">
+        <h3>Organization {{sharedProperties.orgId}}</h3>
+      </div>
+      <div ng-switch-when="machine" class="animate-switch">
+        <div ng-controller="MachineController">
+          <h3>Machine {{sharedProperties.machine._id}} ({{sharedProperties.machine.hostname}})</h3>
+          <ul class="nav nav-tabs">
+            <li><a href="#tab-machine-metrics-mem" data-toggle="tab">Memory</a></li>
+            <li><a href="#tab-machine-metrics" data-toggle="tab">Metrics</a></li>
+            <li><a href="#tab-machine-logs" data-toggle="tab">Logs</a></li>
+            <li><a href="#tab-machine-preferences" data-toggle="tab">Preferences</a></li>
+          </ul>
+          <div class="tab-content">
+            <div id="tab-machine-metrics-mem" class="tab-pane fade in active">
+              <div class="row">
+                <div class="col-md-6">
+                  <!--d3-metric(id="mem-total-{{sharedProperties.machine._id}}",machine="sharedProperties.machine", metric-name="mem:total", type="multiBarChart")-->
+                  <!--    svg-->
+                  <d3-metric machine="sharedProperties.machine" metric-name="mem:free" type="line">
+                    <svg></svg>
+                  </d3-metric>
+                  <d3-metric id="test" machine="sharedProperties.machine" metric-name="mem:free" limit="1" type="pie" max="true">
+                    <svg></svg>
+                  </d3-metric>
+                </div>
+                <div class="col-md-6">
+                  <d3-metric machine="sharedProperties.machine" metric-name="mem:total" type="line">
+                    <svg></svg>
+                  </d3-metric>
+                  <d3-metric id="test" machine="sharedProperties.machine" metric-name="mem:total" limit="1" type="pie" max="true">
+                    <svg></svg>
+                  </d3-metric>
+                </div>
+              </div>
+            </div>
+            <!-- Example to show a more dynamic data driven layout-->
+            <div id="tab-machine-metrics" class="tab-pane fade in active"><!--div.row
+              <div class="col-md-6">
+                <div ng-repeat="m in sharedProperties.defaultDashboardMetrics" class="metric-container">
+                  <d3-metric id="{{m.group}}-{{m.name}}-{{sharedProperties.machine._id}}" machine="sharedProperties.machine" metric="m" type="m.type">
+                    <svg></svg>
+                  </d3-metric>
+                </div>
+              </div>
+              <div class="col-md-6">TBD</div>-->
+            </div>
+            <div id="tab-machine-logs" class="tab-pane active fade">TBD</div>
+            <div id="tab-machine-preferences" class="tab-pane active fade">TBD</div>
+          </div>
+        </div>
+      </div>
+      <div ng-switch-default="ng-switch-default" class="animate-switch">
+        <h3>Account {{sharedProperties.accountId}}</h3>
+      </div>
+    </div>
+    <!-- TODO show an account dashboard when an account is selected only in the URL-->
+    <!-- That should show all machines and a few selected metrics for each machine-->
+    <!-- For m in machines-->
+    <div ng-repeat="machine in denormMachines">
+      <div ng-repeat="metric in dashboardMetrics">
+        <d3Visualization machine="machine" metric="metric" type="multiBar" legend="false"></d3Visualization>
+      </div>
+    </div>
+    <div ng-if="selectedMachine">
+      <h3>Machine {{machine.uuid}}</h3>
+      <tabset>
+        <tab heading="Dashboard">
+          <h3>Dashboard</h3>
+        </tab>
+        <tab heading="Logs">
+          <h3>TBD</h3>
+        </tab>
+        <tab heading="Metrics">Metrics List</tab>
+      </tabset>
+    </div>
+  </div>
+</div>
