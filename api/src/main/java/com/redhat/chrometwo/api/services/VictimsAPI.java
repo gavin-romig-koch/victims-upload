@@ -14,6 +14,7 @@ public class VictimsAPI extends Application {
     public Set<Class<?>> getClasses() {
         final HashSet<Class<?>> set = new HashSet<Class<?>>();
         set.add(AccountWS.class);
+        set.add(Check.class);
 
         return set;
     }
