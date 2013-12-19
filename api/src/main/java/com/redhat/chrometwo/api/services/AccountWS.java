@@ -30,6 +30,6 @@ public class AccountWS {
     	System.out.println(request.getAttribute(SecurityInterceptor.USER_ID));
     	System.out.println(request.getAttribute(SecurityInterceptor.IS_INTERNAL));
 
-        return "woot";
+        return "woot 88";
     }
 }
