@@ -55,6 +55,7 @@ public class Check {
         return hash;
     }
 
+
     @POST
     @Path("/{fileName}")
     public String checkFile(InputStream body,
@@ -75,9 +76,8 @@ public class Check {
             cache = new VictimsResultCache();
 
         } catch (VictimsException e) {
-            //e.printStackTrace();
-            // return new ExitFailure(e.getMessage());
-            return result.append("VictimsException: " + e).toString();
+            e.printStackTrace();
+            return result.append(e.toString()).toString();
         }
 
         String key = checksum(body);
@@ -96,8 +96,8 @@ public class Check {
                     result.append(fileName + " ok");
                 }
             } catch (VictimsException e) {
-                //e.printStackTrace();
-                result.append(e.getMessage()).toString();
+                e.printStackTrace();
+                result.append(e.toString()).toString();
             }
         }
         
@@ -124,15 +124,13 @@ public class Check {
                     }
                     
                 } catch (VictimsException e) {
-                    //e.printStackTrace();
-                    // return new ExitFailure(e.getMessage());
-                    return result.append("VictimsException: " + e).toString();
+                    e.printStackTrace();
+                    return result.append(e.toString()).toString();
                 }
             }
         } catch (IOException e) {
-            //e.printStackTrace();
-            // return new ExitFailure(e.getMessage());
-            return result.append("VictimsException: " + e).toString();
+            e.printStackTrace();
+            return result.append(e.toString()).toString();
         }
     
         return result.toString();
