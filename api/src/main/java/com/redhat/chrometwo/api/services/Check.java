@@ -11,22 +11,143 @@ import javax.ws.rs.core.Context;
 
 import com.redhat.chrometwo.api.security.SecurityInterceptor;
 
+import com.redhat.victims.VictimsException;
+import com.redhat.victims.VictimsRecord;
+import com.redhat.victims.VictimsResultCache;
+import com.redhat.victims.VictimsScanner;
+import com.redhat.victims.database.VictimsDB;
+import com.redhat.victims.database.VictimsDBInterface;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.lang.StringBuilder;
+
 @Path("/check")
 @Stateless
 @LocalBean
 public class Check {
 
+    private String checksum(InputStream body) {
+        String hash = null;
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA1");
+            byte[] buffer = new byte[1024];
+            while (body.read(buffer) > 0) {
+                md.update(buffer);
+            }
+
+            byte[] digest = md.digest();
+            hash = String.format("%0" + (digest.length << 1) + "X", new BigInteger(1, digest));
+
+        } catch (NoSuchAlgorithmException e) {
+        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
+        }
+
+        return hash;
+    }
+
     @POST
     @Path("/{fileName}")
-    public String getAccount(@PathParam("fileName") String fileName,
-    						  @Context HttpServletRequest request) throws Exception {
-    	System.out.println(request.getAttribute(SecurityInterceptor.ACCOUNT_ID));
-    	System.out.println(request.getAttribute(SecurityInterceptor.USER_ID));
-    	System.out.println(request.getAttribute(SecurityInterceptor.IS_INTERNAL));
+    public String checkFile(InputStream body,
+                            @PathParam("fileName") String fileName,
+                            @Context HttpServletRequest request) throws Exception {
 
-        return "check: fileName: " + fileName 
-            + " account: " + request.getAttribute(SecurityInterceptor.ACCOUNT_ID) 
-            + " id: " + request.getAttribute(SecurityInterceptor.USER_ID) 
-            + " internal: " + request.getAttribute(SecurityInterceptor.IS_INTERNAL);
+        StringBuilder result = new StringBuilder();
+        
+        String s;
+        s = "check: " + fileName + "\n";
+        result.append(s); result.append('\n'); 
+    	System.out.println(s);
+
+        s = request.getAttribute(SecurityInterceptor.ACCOUNT_ID).toString();
+        result.append(s); result.append('\n'); 
+    	System.out.println(s);
+
+        s = request.getAttribute(SecurityInterceptor.USER_ID).toString();
+        result.append(s); result.append('\n');
+    	System.out.println(s);
+
+        s = request.getAttribute(SecurityInterceptor.IS_INTERNAL).toString();
+        result.append(s); result.append('\n');
+    	System.out.println(s);
+
+        VictimsDBInterface db;
+        VictimsResultCache cache;
+
+        try {
+            db = VictimsDB.db();
+            cache = new VictimsResultCache();
+
+        } catch (VictimsException e) {
+            //e.printStackTrace();
+            // return new ExitFailure(e.getMessage());
+            return result.append("VictimsException: " + e).toString();
+        }
+
+        String key = checksum(body);
+        if (key != null && cache.exists(key)) {
+            try {
+                HashSet<String> cves = cache.get(key);
+                if (cves != null && cves.size() > 0) {
+                    result.append(String.format("%s VULNERABLE! ", fileName));
+                    for (String cve : cves) {
+                        result.append(cve);
+                        result.append(" ");
+                    }
+                    
+                    return result.toString();
+                } else {
+                    result.append(fileName + " ok");
+                }
+            } catch (VictimsException e) {
+                //e.printStackTrace();
+                result.append(e.getMessage()).toString();
+            }
+        }
+        
+        // Scan the item
+        ArrayList<VictimsRecord> records = new ArrayList();
+        try {
+            
+            VictimsScanner.scan(fileName, records);
+            for (VictimsRecord record : records) {
+                
+                try {
+                    HashSet<String> cves = db.getVulnerabilities(record);
+                    if (key != null) {
+                        cache.add(key, cves);
+                    }
+                    if (!cves.isEmpty()) {
+                        result.append(String.format("%s VULNERABLE! ", fileName));
+                        for (String cve : cves) {
+                            result.append(cve);
+                            result.append(" ");
+                        }
+                    } else {
+                        result.append(fileName + " ok");
+                    }
+                    
+                } catch (VictimsException e) {
+                    //e.printStackTrace();
+                    // return new ExitFailure(e.getMessage());
+                    return result.append("VictimsException: " + e).toString();
+                }
+            }
+        } catch (IOException e) {
+            //e.printStackTrace();
+            // return new ExitFailure(e.getMessage());
+            return result.append("VictimsException: " + e).toString();
+        }
+    
+        return result.toString();
     }
 }
