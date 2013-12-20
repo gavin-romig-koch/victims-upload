@@ -1,3 +1,5 @@
 echo "THIS IS pre_build script"
+pwd
+ls -l ../../app-root/repo/victims-lib-1.4-SNAPSHOT.jar
 mvn install:install-file -Dfile=../../app-root/repo/victims-lib-1.4-SNAPSHOT.jar -DgroupId=com.redhat.victims -DartifactId=victims-lib -Dversion=1.4-SNAPSHOT -Dpackaging=jar
 
