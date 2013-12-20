@@ -63,22 +63,9 @@ public class Check {
 
         StringBuilder result = new StringBuilder();
         
-        String s;
-        s = "check: " + fileName + "\n";
-        result.append(s); result.append('\n'); 
-    	System.out.println(s);
-
-        s = request.getAttribute(SecurityInterceptor.ACCOUNT_ID).toString();
-        result.append(s); result.append('\n'); 
-    	System.out.println(s);
-
-        s = request.getAttribute(SecurityInterceptor.USER_ID).toString();
-        result.append(s); result.append('\n');
-    	System.out.println(s);
-
-        s = request.getAttribute(SecurityInterceptor.IS_INTERNAL).toString();
-        result.append(s); result.append('\n');
-    	System.out.println(s);
+        result.append("check: ");
+        result.append(fileName);
+        result.append("\n");
 
         VictimsDBInterface db;
         VictimsResultCache cache;
