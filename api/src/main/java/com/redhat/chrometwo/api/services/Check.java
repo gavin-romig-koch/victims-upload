@@ -6,6 +6,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
@@ -30,6 +32,10 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.lang.StringBuilder;
+import java.util.Map;
+
+import org.jboss.resteasy.plugins.providers.multipart.InputPart;
+import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 
 @Path("/check")
 @Stateless
@@ -37,6 +43,22 @@ import java.lang.StringBuilder;
 public class Check {
 
     private int count;
+
+    private String checksum(String body) {
+        String hash = null;
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA1");
+            count = body.length();
+            md.update(body.getBytes());
+
+            byte[] digest = md.digest();
+            hash = String.format("%0" + (digest.length << 1) + "X", new BigInteger(1, digest));
+
+        } catch (NoSuchAlgorithmException e) {
+        }
+
+        return hash;
+    }
 
     private String checksum(InputStream body) {
         String hash = null;
@@ -66,10 +88,9 @@ public class Check {
     }
 
 
-    private String checkOne(VictimsDBInterface db, VictimsResultCache cache, String fileName, InputStream body) throws Exception {
+    private String checkOne(VictimsDBInterface db, VictimsResultCache cache, String fileName, String key) throws Exception {
         StringBuilder result = new StringBuilder();
        
-        String key = checksum(body);
         result.append("key(" + count + "): ");
         result.append(key);
         result.append("\n");
@@ -176,15 +197,15 @@ public class Check {
             return result.append(e.toString()).append("\n").toString();
         }
 
-        result.append(checkOne(db, cache, fileName, body));
+        result.append(checkOne(db, cache, fileName, checksum(body)));
 
         result.append("end of results\n");
         return result.toString();
     }
 
     @POST
-    @Path("/multi")
-    public String checkMulti(@Context HttpServletRequest request) throws Exception {
+	@Consumes({ MediaType.MULTIPART_FORM_DATA })
+    public String checkMulti(MultipartFormDataInput inputForm, @Context HttpServletRequest request) throws Exception {
 
         StringBuilder result = new StringBuilder();
         
@@ -205,15 +226,23 @@ public class Check {
         }
 
         boolean foundAtLeastOne = false;
-        for (Part part : request.getParts()) {
+        Map<String, List<InputPart>> multiValuedMap = inputForm.getFormDataMap();
+        for (Map.Entry<String, List<InputPart>> entry : multiValuedMap.entrySet()) {
             foundAtLeastOne = true;
-            result.append("found part named: " + part.getName());
-            for (String headerName : part.getHeaderNames()) {
-                for (String header : part.getHeaders(headerName)) {
-                    result.append("  header " + headerName + ": " + header);
+            String name = entry.getKey();
+            int count = 0;
+            result.append("found part named: " + name + "\n");
+            for (InputPart aInputPart : entry.getValue()) {
+                count++;
+                result.append("found value " + count + ":\n");
+                for (Map.Entry<String, List<String>> headerEntry : aInputPart.getHeaders().entrySet()) {
+                    for (String headerValue : headerEntry.getValue()) {
+                        result.append(" header " + headerEntry.getKey() + ": " + headerValue);
+                    }
                 }
+                result.append("  mediaType: " + aInputPart.getMediaType() + "\n");
+                result.append(checkOne(db, cache, name, checksum(aInputPart.getBodyAsString())));
             }
-            result.append(checkOne(db, cache, part.getName(), part.getInputStream()));
         }
 
         if (!foundAtLeastOne) {
