@@ -92,6 +92,7 @@ public class Check {
     private String checkOne(VictimsDBInterface db, VictimsResultCache cache, String fileName, String key) throws Exception {
         StringBuilder result = new StringBuilder();
        
+        result.append("filename: ").append(fileName).append("\n");
         result.append("key(" + count + "): ");
         result.append(key);
         result.append("\n");
@@ -115,15 +116,19 @@ public class Check {
                 e.printStackTrace();
                 return result.append(e.toString()).append("\n").toString();
             }
-        }
+        } else {
+            result.append("key is not cached\n");
+        }            
         
         // Scan the item
         ArrayList<VictimsRecord> records = new ArrayList();
         try {
+            int count = 0;
             
             VictimsScanner.scan(fileName, records);
             for (VictimsRecord record : records) {
-                
+                count++;
+                result.append("found the " + count + "th record for " + fileName);
                 try {
                     HashSet<String> cves = db.getVulnerabilities(record);
                     if (key != null) {
@@ -147,6 +152,9 @@ public class Check {
                     return result.append(e.toString()).append("\n").toString();
                 }
             }
+            if (count == 0) {
+                result.append("found no records for " + fileName);
+            }                
         } catch (IOException e) {
             result.append("VictimsException while scanning file:\n");
             e.printStackTrace();
@@ -240,7 +248,7 @@ public class Check {
                 result.append("found value " + count + ":\n");
                 for (Map.Entry<String, List<String>> headerEntry : aInputPart.getHeaders().entrySet()) {
                     for (String headerValue : headerEntry.getValue()) {
-                        result.append(" header " + headerEntry.getKey() + ": " + headerValue).append("\n");
+                        result.append("  header " + headerEntry.getKey() + ": " + headerValue).append("\n");
                         if (headerEntry.getKey().equals("Content-Disposition")) {
                             dispString += headerValue;
                         }
