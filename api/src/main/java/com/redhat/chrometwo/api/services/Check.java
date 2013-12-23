@@ -82,6 +82,9 @@ public class Check {
         }
 
         String key = checksum(body);
+        result.append("key: ");
+        result.append(key);
+        result.append("\n");
         if (key != null && cache.exists(key)) {
             try {
                 HashSet<String> cves = cache.get(key);
