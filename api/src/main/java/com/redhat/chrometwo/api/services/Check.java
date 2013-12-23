@@ -204,6 +204,7 @@ public class Check {
     }
 
     @POST
+    @Path("/multi")
 	@Consumes({ MediaType.MULTIPART_FORM_DATA })
     public String checkMulti(MultipartFormDataInput inputForm, @Context HttpServletRequest request) throws Exception {
 
