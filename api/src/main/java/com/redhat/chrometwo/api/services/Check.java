@@ -65,35 +65,14 @@ public class Check {
     }
 
 
-    @POST
-    @Path("/{fileName}")
-    public String checkFile(InputStream body,
-                            @PathParam("fileName") String fileName,
-                            @Context HttpServletRequest request) throws Exception {
-
+    private String checkOne(VictimsDBInterface db, VictimsResultCache cache, String fileName, InputStream body) throws Exception {
         StringBuilder result = new StringBuilder();
-        
-        result.append("check: ");
-        result.append(fileName);
-        result.append("\n");
-
-        VictimsDBInterface db;
-        VictimsResultCache cache;
-
-        try {
-            db = VictimsDB.db();
-            cache = new VictimsResultCache();
-
-        } catch (VictimsException e) {
-            result.append("VictimsException while opening the database:\n");
-            e.printStackTrace();
-            return result.append(e.toString()).append("\n").toString();
-        }
-
+       
         String key = checksum(body);
         result.append("key(" + count + ": ");
         result.append(key);
         result.append("\n");
+
         if (key != null && cache.exists(key)) {
             try {
                 HashSet<String> cves = cache.get(key);
@@ -150,6 +129,37 @@ public class Check {
             e.printStackTrace();
             return result.append(e.toString()).append("\n").toString();
         }
+
+        return result.toString();
+    }
+
+
+    @POST
+    @Path("/{fileName}")
+    public String checkFile(InputStream body,
+                            @PathParam("fileName") String fileName,
+                            @Context HttpServletRequest request) throws Exception {
+
+        StringBuilder result = new StringBuilder();
+        
+        result.append("check: ");
+        result.append(fileName);
+        result.append("\n");
+
+        VictimsDBInterface db;
+        VictimsResultCache cache;
+
+        try {
+            db = VictimsDB.db();
+            cache = new VictimsResultCache();
+
+        } catch (VictimsException e) {
+            result.append("VictimsException while opening the database:\n");
+            e.printStackTrace();
+            return result.append(e.toString()).append("\n").toString();
+        }
+
+        result.append(checkOne(db, cache, fileName, body));
 
         result.append("end of results\n");
         return result.toString();
