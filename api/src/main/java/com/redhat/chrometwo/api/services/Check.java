@@ -35,13 +35,22 @@ import java.lang.StringBuilder;
 @LocalBean
 public class Check {
 
+    private int count;
+
     private String checksum(InputStream body) {
         String hash = null;
         try {
             MessageDigest md = MessageDigest.getInstance("SHA1");
             byte[] buffer = new byte[1024];
-            while (body.read(buffer) > 0) {
+            int size;
+            count = 0;
+
+            size = body.read(buffer);
+            count += size;
+            while (size > 0) {
                 md.update(buffer);
+                size = body.read(buffer);
+                count += size;
             }
 
             byte[] digest = md.digest();
@@ -82,7 +91,7 @@ public class Check {
         }
 
         String key = checksum(body);
-        result.append("key: ");
+        result.append("key(" + count + ": ");
         result.append(key);
         result.append("\n");
         if (key != null && cache.exists(key)) {
