@@ -189,6 +189,7 @@ public class Check {
         }
 
         if (!foundAtLeastOne) {
+            result.append("no parts found\n");
             result.append(checkOne(db, cache, fileName, body));
         }
         result.append("end of results\n");
