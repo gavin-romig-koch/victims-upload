@@ -13,6 +13,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
 
 import com.redhat.chrometwo.api.security.SecurityInterceptor;
+import javax.mail.internet.ContentDisposition;
 
 import com.redhat.victims.VictimsException;
 import com.redhat.victims.VictimsRecord;
@@ -234,15 +235,25 @@ public class Check {
             int count = 0;
             result.append("found part named: " + name + "\n");
             for (InputPart aInputPart : entry.getValue()) {
+                String dispString = "";
                 count++;
                 result.append("found value " + count + ":\n");
                 for (Map.Entry<String, List<String>> headerEntry : aInputPart.getHeaders().entrySet()) {
                     for (String headerValue : headerEntry.getValue()) {
-                        result.append(" header " + headerEntry.getKey() + ": " + headerValue);
+                        result.append(" header " + headerEntry.getKey() + ": " + headerValue).append("\n");
+                        if (headerEntry.getKey().equals("Content-Disposition")) {
+                            dispString += headerValue;
+                        }
                     }
                 }
                 result.append("  mediaType: " + aInputPart.getMediaType() + "\n");
-                result.append(checkOne(db, cache, name, checksum(aInputPart.getBodyAsString())));
+
+                ContentDisposition disp = new ContentDisposition(dispString);
+                String fileName = disp.getParameter("filename");
+                if (fileName == null) {
+                    fileName = name;
+                }
+                result.append(checkOne(db, cache, fileName, checksum(aInputPart.getBodyAsString())));
             }
         }
 
