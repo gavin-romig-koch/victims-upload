@@ -141,7 +141,7 @@ public class Check {
             for (java.util.Enumeration<java.lang.String> headers = request.getHeaders(headerName);
                  headers.hasMoreElements();) {
                 String header = headers.nextElement();
-                result.append(header + "\n");
+                result.append(headerName + ": " + header + "\n");
             }
         }
         return result.toString();
