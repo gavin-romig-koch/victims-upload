@@ -3,6 +3,7 @@ package com.redhat.chrometwo.api.services;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.Part;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -175,8 +176,21 @@ public class Check {
             return result.append(e.toString()).append("\n").toString();
         }
 
-        result.append(checkOne(db, cache, fileName, body));
+        boolean foundAtLeastOne = false;
+        for (Part part : request.getParts()) {
+            foundAtLeastOne = true;
+            result.append("found part named: " + part.getName());
+            for (String headerName : part.getHeaderNames()) {
+                for (String header : part.getHeaders(headerName)) {
+                    result.append("  header " + headerName + ": " + header);
+                }
+            }
+            result.append(checkOne(db, cache, part.getName(), part.getInputStream()));
+        }
 
+        if (!foundAtLeastOne) {
+            result.append(checkOne(db, cache, fileName, body));
+        }
         result.append("end of results\n");
         return result.toString();
     }
