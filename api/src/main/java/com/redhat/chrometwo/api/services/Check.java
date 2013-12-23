@@ -15,6 +15,8 @@ import javax.ws.rs.core.Context;
 import com.redhat.chrometwo.api.security.SecurityInterceptor;
 import javax.mail.internet.ContentDisposition;
 
+import java.io.ByteArrayInputStream;
+
 import com.redhat.victims.VictimsException;
 import com.redhat.victims.VictimsRecord;
 import com.redhat.victims.VictimsResultCache;
@@ -45,22 +47,6 @@ public class Check {
 
     private int count;
 
-    private String checksum(String body) {
-        String hash = null;
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA1");
-            count = body.length();
-            md.update(body.getBytes());
-
-            byte[] digest = md.digest();
-            hash = String.format("%0" + (digest.length << 1) + "X", new BigInteger(1, digest));
-
-        } catch (NoSuchAlgorithmException e) {
-        }
-
-        return hash;
-    }
-
     private String checksum(InputStream body) {
         String hash = null;
         try {
@@ -89,10 +75,12 @@ public class Check {
     }
 
 
-    private String checkOne(VictimsDBInterface db, VictimsResultCache cache, String fileName, String key) throws Exception {
+    private String checkOne(VictimsDBInterface db, VictimsResultCache cache, String fileName, InputStream inputStream) throws Exception {
         StringBuilder result = new StringBuilder();
        
         result.append("filename: ").append(fileName).append("\n");
+
+        String key = checksum(inputStream);
         result.append("key(" + count + "): ");
         result.append(key);
         result.append("\n");
@@ -124,9 +112,7 @@ public class Check {
         ArrayList<VictimsRecord> records = new ArrayList();
         try {
             int count = 0;
-            
-            VictimsScanner.scan(fileName, records);
-            for (VictimsRecord record : records) {
+            for (VictimsRecord record : VictimsScanner.getRecords(inputStream, fileName)) {
                 count++;
                 result.append("found the " + count + "th record for " + fileName);
                 try {
@@ -153,7 +139,7 @@ public class Check {
                 }
             }
             if (count == 0) {
-                result.append("found no records for " + fileName);
+                result.append("found no records for ").append(fileName).append("\n");
             }                
         } catch (IOException e) {
             result.append("VictimsException while scanning file:\n");
@@ -206,7 +192,7 @@ public class Check {
             return result.append(e.toString()).append("\n").toString();
         }
 
-        result.append(checkOne(db, cache, fileName, checksum(body)));
+        result.append(checkOne(db, cache, fileName, body));
 
         result.append("end of results\n");
         return result.toString();
@@ -261,7 +247,10 @@ public class Check {
                 if (fileName == null) {
                     fileName = name;
                 }
-                result.append(checkOne(db, cache, fileName, checksum(aInputPart.getBodyAsString())));
+
+                ByteArrayInputStream inputStream = new ByteArrayInputStream(aInputPart.getBodyAsString().getBytes()); 
+
+                result.append(checkOne(db, cache, fileName, inputStream));
             }
         }
 
