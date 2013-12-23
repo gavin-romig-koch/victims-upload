@@ -176,6 +176,34 @@ public class Check {
             return result.append(e.toString()).append("\n").toString();
         }
 
+        result.append(checkOne(db, cache, fileName, body));
+
+        result.append("end of results\n");
+        return result.toString();
+    }
+
+    @POST
+    @Path("/multi")
+    public String checkMulti(@Context HttpServletRequest request) throws Exception {
+
+        StringBuilder result = new StringBuilder();
+        
+        result.append("multi: ");
+        result.append(displayHeaders(request));
+
+        VictimsDBInterface db;
+        VictimsResultCache cache;
+
+        try {
+            db = VictimsDB.db();
+            cache = new VictimsResultCache();
+
+        } catch (VictimsException e) {
+            result.append("VictimsException while opening the database:\n");
+            e.printStackTrace();
+            return result.append(e.toString()).append("\n").toString();
+        }
+
         boolean foundAtLeastOne = false;
         for (Part part : request.getParts()) {
             foundAtLeastOne = true;
@@ -190,7 +218,6 @@ public class Check {
 
         if (!foundAtLeastOne) {
             result.append("no parts found\n");
-            result.append(checkOne(db, cache, fileName, body));
         }
         result.append("end of results\n");
         return result.toString();
