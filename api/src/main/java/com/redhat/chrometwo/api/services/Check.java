@@ -76,8 +76,9 @@ public class Check {
             cache = new VictimsResultCache();
 
         } catch (VictimsException e) {
+            result.append("VictimsException while opening the database:\n");
             e.printStackTrace();
-            return result.append(e.toString()).toString();
+            return result.append(e.toString()).append("\n").toString();
         }
 
         String key = checksum(body);
@@ -90,14 +91,15 @@ public class Check {
                         result.append(cve);
                         result.append(" ");
                     }
-                    
+                    result.append("\n");
                     return result.toString();
                 } else {
-                    result.append(fileName + " ok");
+                    result.append(fileName + " ok\n");
                 }
             } catch (VictimsException e) {
+                result.append("VictimsException while checking cache:\n");
                 e.printStackTrace();
-                result.append(e.toString()).toString();
+                return result.append(e.toString()).append("\n").toString();
             }
         }
         
@@ -119,20 +121,25 @@ public class Check {
                             result.append(cve);
                             result.append(" ");
                         }
+                        result.append("\n");
+                        return result.toString();
                     } else {
-                        result.append(fileName + " ok");
+                        result.append(fileName + " ok\n");
                     }
                     
                 } catch (VictimsException e) {
+                    result.append("VictimsException while checking database:\n");
                     e.printStackTrace();
-                    return result.append(e.toString()).toString();
+                    return result.append(e.toString()).append("\n").toString();
                 }
             }
         } catch (IOException e) {
+            result.append("VictimsException while scanning file:\n");
             e.printStackTrace();
-            return result.append(e.toString()).toString();
+            return result.append(e.toString()).append("\n").toString();
         }
-    
+
+        result.append("end of results\n");
         return result.toString();
     }
 }
