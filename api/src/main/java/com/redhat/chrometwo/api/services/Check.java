@@ -69,7 +69,7 @@ public class Check {
         StringBuilder result = new StringBuilder();
        
         String key = checksum(body);
-        result.append("key(" + count + ": ");
+        result.append("key(" + count + "): ");
         result.append(key);
         result.append("\n");
 
