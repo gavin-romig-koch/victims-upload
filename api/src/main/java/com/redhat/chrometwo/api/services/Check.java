@@ -133,6 +133,21 @@ public class Check {
         return result.toString();
     }
 
+    private String displayHeaders(HttpServletRequest request) throws Exception {
+        StringBuilder result = new StringBuilder();
+        for (java.util.Enumeration<java.lang.String> headerNames = request.getHeaderNames();
+             headerNames.hasMoreElements();) {
+            String headerName = headerNames.nextElement();
+            for (java.util.Enumeration<java.lang.String> headers = request.getHeaders(headerName);
+                 headers.hasMoreElements();) {
+                String header = headers.nextElement();
+                result.append(header + "\n");
+            }
+        }
+        return result.toString();
+    }
+
+
 
     @POST
     @Path("/{fileName}")
@@ -145,6 +160,7 @@ public class Check {
         result.append("check: ");
         result.append(fileName);
         result.append("\n");
+        result.append(displayHeaders(request));
 
         VictimsDBInterface db;
         VictimsResultCache cache;
