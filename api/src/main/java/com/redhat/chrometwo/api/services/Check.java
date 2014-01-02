@@ -221,6 +221,18 @@ public class Check {
             return result.append(e.toString()).append("\n").toString();
         }
 
+        try {
+            result.append("About to synchronize local database with upstream ...\n");
+            db.synchronize();
+            result.append("   successful synchronize.\n");
+
+        } catch (VictimsException e) {
+            result.append("VictimsException while synchronize-ing local database:\n");
+            e.printStackTrace();
+            return result.append(e.toString()).append("\n").toString();
+        }
+
+
         boolean foundAtLeastOne = false;
         Map<String, List<InputPart>> multiValuedMap = inputForm.getFormDataMap();
         for (Map.Entry<String, List<InputPart>> entry : multiValuedMap.entrySet()) {
