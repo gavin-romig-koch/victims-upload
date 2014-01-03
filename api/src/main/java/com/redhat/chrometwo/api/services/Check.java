@@ -113,7 +113,7 @@ public class Check {
             int count = 0;
             for (VictimsRecord record : VictimsScanner.getRecords(inputStream, fileName)) {
                 count++;
-                result.append("found the " + count + "th record for " + fileName);
+                result.append("found the " + count + "th record for " + fileName + "\n");
                 try {
                     HashSet<String> cves = db.getVulnerabilities(record);
                     if (key != null) {
