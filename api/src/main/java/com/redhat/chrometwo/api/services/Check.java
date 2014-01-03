@@ -89,15 +89,14 @@ public class Check {
             try {
                 HashSet<String> cves = cache.get(key);
                 if (cves != null && cves.size() > 0) {
-                    result.append(String.format("%s VULNERABLE! ", fileName));
+                    result.append(String.format("cached: %s VULNERABLE! ", fileName));
                     for (String cve : cves) {
                         result.append(cve);
                         result.append(" ");
                     }
                     result.append("\n");
-                    return result.toString();
                 } else {
-                    result.append(fileName + " ok\n");
+                    result.append("cached: " + fileName + " ok\n");
                 }
             } catch (VictimsException e) {
                 result.append("VictimsException while checking cache:\n");
@@ -127,7 +126,6 @@ public class Check {
                             result.append(" ");
                         }
                         result.append("\n");
-                        return result.toString();
                     } else {
                         result.append(fileName + " ok\n");
                     }
