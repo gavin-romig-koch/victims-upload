@@ -80,7 +80,7 @@ public class Check {
        
         result.append("filename: ").append(fileName).append("\n");
 
-        String key = checksum(inputStream);
+        String key = null;   //checksum(inputStream);
         result.append("key(" + count + "): ");
         result.append(key);
         result.append("\n");
