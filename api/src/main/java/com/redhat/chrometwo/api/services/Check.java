@@ -25,11 +25,10 @@ import com.redhat.victims.database.VictimsDB;
 import com.redhat.victims.database.VictimsDBInterface;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -376,8 +375,8 @@ public class Check {
     private String copyToTempFile(String fileName, String contents) throws IOException {
         File n = new File(createTempDir(), fileName);
         System.out.println("tempfile name: " + n.getAbsolutePath());
-        OutputStream os = new FileOutputStream(n);
-        os.write(contents.getBytes());
+        FileWriter os = new FileWriter(n);
+        os.write(contents);
         os.close();
         return n.getAbsolutePath();
     }
