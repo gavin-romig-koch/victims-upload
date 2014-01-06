@@ -75,6 +75,7 @@ public class Check {
     }
 
 
+
     private String checkOne(VictimsDBInterface db, VictimsResultCache cache, String fileName, InputStream inputStream) throws Exception {
         StringBuilder result = new StringBuilder();
        
