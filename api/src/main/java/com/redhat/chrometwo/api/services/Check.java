@@ -25,9 +25,11 @@ import com.redhat.victims.database.VictimsDB;
 import com.redhat.victims.database.VictimsDBInterface;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -52,15 +54,8 @@ public class Check {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA1");
             byte[] buffer = new byte[1024];
-            int size;
-            count = 0;
-
-            size = body.read(buffer);
-            count += size;
-            while (size > 0) {
+            while (body.read(buffer) > 0) {
                 md.update(buffer);
-                size = body.read(buffer);
-                count += size;
             }
 
             byte[] digest = md.digest();
@@ -72,9 +67,98 @@ public class Check {
         }
 
         return hash;
+
     }
 
+    public String checksum(String filename) {
+        String hash = null;
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA1");
+            InputStream is = new FileInputStream(new File(filename));
+            byte[] buffer = new byte[1024];
+            while (is.read(buffer) > 0) {
+                md.update(buffer);
+            }
 
+            byte[] digest = md.digest();
+            hash = String.format("%0" + (digest.length << 1) + "X", new BigInteger(1, digest));
+
+        } catch (NoSuchAlgorithmException e) {
+        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
+        }
+
+        return hash;
+
+    }
+
+    private String checkOne(VictimsDBInterface db, VictimsResultCache cache, String arg) throws Exception {
+
+            StringBuilder result = new StringBuilder();
+       
+            result.append("filename: ").append(arg).append("\n");
+
+            String key = null;   //checksum(arg);
+            result.append("key: ");
+            result.append(key);
+            result.append("\n");
+            
+            // Check cache 
+            if (key != null && cache.exists(key)) {
+                try {
+                    HashSet<String> cves = cache.get(key);
+                    if (cves != null && cves.size() > 0) {
+                        result.append(String.format("%s VULNERABLE! ", arg));
+                        for (String cve : cves) {
+                            result.append(cve);
+                            result.append(" ");
+                        }
+                        result.append("\n");
+                    } else {
+                        result.append(arg + " ok");
+                    }
+                } catch (VictimsException e) {
+                    result.append("VictimsException while checking cache:\n");
+                    e.printStackTrace();
+                    return result.append(e.toString()).append("\n").toString();
+                }
+            }
+
+            // Scan the item
+            ArrayList<VictimsRecord> records = new ArrayList();
+            try {
+
+                VictimsScanner.scan(arg, records);
+                for (VictimsRecord record : records) {
+
+                    try {
+                        HashSet<String> cves = db.getVulnerabilities(record);
+                        if (key != null) {
+                            cache.add(key, cves);
+                        }
+                        if (!cves.isEmpty()) {
+                            result.append(String.format("%s VULNERABLE! ", arg));
+                            for (String cve : cves) {
+                                result.append(cve);
+                                result.append(" ");
+                            }
+                        } else {
+                            result.append(arg + " ok");
+                        }
+
+                    } catch (VictimsException e) {
+                        result.append("VictimsException while checking database:\n");
+                        e.printStackTrace();
+                        return result.append(e.toString()).append("\n").toString();
+                    }
+                }
+            } catch (IOException e) {
+                result.append("VictimsException while scanning file:\n");
+                e.printStackTrace();
+                return result.append(e.toString()).append("\n").toString();
+            }
+            return result.toString();
+    }
 
     private String checkOne(VictimsDBInterface db, VictimsResultCache cache, String fileName, InputStream inputStream) throws Exception {
         StringBuilder result = new StringBuilder();
@@ -259,9 +343,9 @@ public class Check {
                     fileName = name;
                 }
 
-                ByteArrayInputStream inputStream = new ByteArrayInputStream(aInputPart.getBodyAsString().getBytes()); 
+                String tmpFileName = copyToTempFile(fileName, aInputPart.getBodyAsString());
 
-                result.append(checkOne(db, cache, fileName, inputStream));
+                result.append(checkOne(db, cache, tmpFileName));
             }
         }
 
@@ -271,4 +355,40 @@ public class Check {
         result.append("end of results\n");
         return result.toString();
     }
+
+    private String createTempDir() throws IOException {
+        File t = File.createTempFile("victims", "");
+        System.out.println("directory tempfile name: " + t.getAbsolutePath());
+        if (!t.delete()) {
+            System.out.println("could not delete tempfile before creating directory: " + t.getAbsolutePath());
+            throw new IOException("could not delete tempfile before creating directory: " + t.getAbsolutePath());
+        }
+        System.out.println("deleted tempfile name: " + t.getAbsolutePath());
+        if (!t.mkdir()) {
+            System.out.println("could not create directory: " + t.getAbsolutePath());
+            throw new IOException("could not create directory: " + t.getAbsolutePath());
+        }
+        System.out.println("tempdir name: " + t.getAbsolutePath());
+        return t.getAbsolutePath();
+    }
+
+
+    private String copyToTempFile(String fileName, String contents) throws IOException {
+        File n = new File(createTempDir(), fileName);
+        System.out.println("tempfile name: " + n.getAbsolutePath());
+        OutputStream os = new FileOutputStream(n);
+        os.write(contents.getBytes());
+        os.close();
+        return n.getAbsolutePath();
+    }
+
+    private void deleteTempFile(String fileName) {
+        System.out.println("deleteTempFile called on: " + fileName);
+        File n = new File(fileName);
+        n.delete();
+        n.getParentFile().delete();
+    }
+
+
+
 }
