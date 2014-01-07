@@ -25,10 +25,11 @@ import com.redhat.victims.database.VictimsDB;
 import com.redhat.victims.database.VictimsDBInterface;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -322,11 +323,11 @@ public class Check {
             String name = entry.getKey();
             int count = 0;
             result.append("found part named: " + name + "\n");
-            for (InputPart aInputPart : entry.getValue()) {
+            for (InputPart inputPart : entry.getValue()) {
                 String dispString = "";
                 count++;
                 result.append("found value " + count + ":\n");
-                for (Map.Entry<String, List<String>> headerEntry : aInputPart.getHeaders().entrySet()) {
+                for (Map.Entry<String, List<String>> headerEntry : inputPart.getHeaders().entrySet()) {
                     for (String headerValue : headerEntry.getValue()) {
                         result.append("  header " + headerEntry.getKey() + ": " + headerValue).append("\n");
                         if (headerEntry.getKey().equals("Content-Disposition")) {
@@ -334,7 +335,7 @@ public class Check {
                         }
                     }
                 }
-                result.append("  mediaType: " + aInputPart.getMediaType() + "\n");
+                result.append("  mediaType: " + inputPart.getMediaType() + "\n");
 
                 ContentDisposition disp = new ContentDisposition(dispString);
                 String fileName = disp.getParameter("filename");
@@ -342,7 +343,7 @@ public class Check {
                     fileName = name;
                 }
 
-                String tmpFileName = copyToTempFile(fileName, aInputPart.getBodyAsString());
+                String tmpFileName = copyToTempFile(fileName, inputPart.getBody(InputStream.class, null));
 
                 result.append(checkOne(db, cache, tmpFileName));
             }
@@ -372,12 +373,18 @@ public class Check {
     }
 
 
-    private String copyToTempFile(String fileName, String contents) throws IOException {
+    private String copyToTempFile(String fileName, InputStream inputStream) throws IOException {
         File n = new File(createTempDir(), fileName);
         System.out.println("tempfile name: " + n.getAbsolutePath());
-        FileWriter os = new FileWriter(n);
-        os.write(contents);
-        os.close();
+        OutputStream outputStream = new FileOutputStream(n);
+
+        int count = 0;
+        byte[] buffer = new byte[1024];
+        while ((count = inputStream.read(buffer)) != -1) {
+            outputStream.write(buffer, 0, count);
+        }
+        outputStream.flush();
+        outputStream.close();
         return n.getAbsolutePath();
     }
 
