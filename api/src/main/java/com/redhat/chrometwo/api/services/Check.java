@@ -47,14 +47,31 @@ import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 @LocalBean
 public class Check {
 
+
+    public Check() {
+
+        // This is done at initializer time so that if we have to create a 
+        // completely new local copy of the db, it will be done outside of
+        // an http request/response cycle.
+        try {
+            VictimsDBInterface db = VictimsDB.db();
+            db.synchronize();
+
+        } catch (VictimsException e) {
+            e.printStackTrace();
+        }
+    }
+
+
     @POST
 	@Consumes({ MediaType.MULTIPART_FORM_DATA })
     public String checkMulti(MultipartFormDataInput inputForm, @Context HttpServletRequest request) throws Exception {
 
         StringBuilder result = new StringBuilder();
+        StringBuilder trace = new StringBuilder();
         
-        result.append("multi: ");
-        result.append(displayHeaders(request));
+        trace.append("multi: ");
+        trace.append(displayHeaders(request));
 
         VictimsDBInterface db;
         VictimsResultCache cache;
@@ -70,9 +87,9 @@ public class Check {
         }
 
         try {
-            result.append("About to synchronize local database with upstream ...\n");
+            trace.append("About to synchronize local database with upstream ...\n");
             db.synchronize();
-            result.append("   successful synchronize.\n");
+            trace.append("   successful synchronize.\n");
 
         } catch (VictimsException e) {
             result.append("VictimsException while synchronize-ing local database:\n");
@@ -87,20 +104,20 @@ public class Check {
             foundAtLeastOne = true;
             String name = entry.getKey();
             int count = 0;
-            result.append("found part named: " + name + "\n");
+            trace.append("found part named: " + name + "\n");
             for (InputPart inputPart : entry.getValue()) {
                 String dispString = "";
                 count++;
-                result.append("found value " + count + ":\n");
+                trace.append("found value " + count + ":\n");
                 for (Map.Entry<String, List<String>> headerEntry : inputPart.getHeaders().entrySet()) {
                     for (String headerValue : headerEntry.getValue()) {
-                        result.append("  header " + headerEntry.getKey() + ": " + headerValue).append("\n");
+                        trace.append("  header " + headerEntry.getKey() + ": " + headerValue).append("\n");
                         if (headerEntry.getKey().equals("Content-Disposition")) {
                             dispString += headerValue;
                         }
                     }
                 }
-                result.append("  mediaType: " + inputPart.getMediaType() + "\n");
+                trace.append("  mediaType: " + inputPart.getMediaType() + "\n");
 
                 ContentDisposition disp = new ContentDisposition(dispString);
                 String fileName = disp.getParameter("filename");
@@ -122,36 +139,45 @@ public class Check {
         }
 
         if (!foundAtLeastOne) {
-            result.append("no parts found\n");
+            trace.append("no parts found\n");
         }
-        result.append("end of results\n");
+        trace.append("end of results\n");
         return result.toString();
     }
 
-    private String checkOne(VictimsDBInterface db, VictimsResultCache cache, String arg) throws Exception {
+    private String checkOne(VictimsDBInterface db, VictimsResultCache cache, String tmpFileName) throws Exception {
+        // tmpFileName is the full (absolute) file name of the temporary copy of the uploaded file
+        // it's last path element should be the name of the file that the user attached to it in the uploaded request
+ 
+            String fileName = new File(tmpFileName).getName();
 
             StringBuilder result = new StringBuilder();
+            StringBuilder trace = new StringBuilder();
        
-            result.append("filename: ").append(arg).append("\n");
+            trace.append("filename: ").append(tmpFileName).append("\n");
 
-            String key = null;   //checksum(arg);
-            result.append("key: ");
-            result.append(key);
-            result.append("\n");
+            // the cache was giving incorrect results (saying things were OK when they were not, 
+            // or vise-versa.  It may be behaving this way because i was screwing with the local 
+            // database alot while i was getting this working, or there may be some deeper problem.
+            // for now just turn off the cache.
+            String key = null;   //checksum(tmpFileName);
+            trace.append("key: ");
+            trace.append(key);
+            trace.append("\n");
             
             // Check cache 
             if (key != null && cache.exists(key)) {
                 try {
                     HashSet<String> cves = cache.get(key);
                     if (cves != null && cves.size() > 0) {
-                        result.append(String.format("%s VULNERABLE! ", arg));
+                        result.append(String.format("%s VULNERABLE! ", fileName));
                         for (String cve : cves) {
                             result.append(cve);
                             result.append(" ");
                         }
                         result.append("\n");
                     } else {
-                        result.append(arg + " ok\n");
+                        result.append(fileName + " ok\n");
                     }
                 } catch (VictimsException e) {
                     result.append("VictimsException while checking cache:\n");
@@ -164,7 +190,7 @@ public class Check {
             ArrayList<VictimsRecord> records = new ArrayList();
             try {
 
-                VictimsScanner.scan(arg, records);
+                VictimsScanner.scan(tmpFileName, records);
                 for (VictimsRecord record : records) {
 
                     try {
@@ -173,14 +199,14 @@ public class Check {
                             cache.add(key, cves);
                         }
                         if (!cves.isEmpty()) {
-                            result.append(String.format("%s VULNERABLE! ", arg));
+                            result.append(String.format("%s VULNERABLE! ", fileName));
                             for (String cve : cves) {
                                 result.append(cve);
                                 result.append(" ");
                             }
                             result.append("\n");
                         } else {
-                            result.append(arg + " ok\n");
+                            result.append(fileName + " ok\n");
                         }
 
                     } catch (VictimsException e) {
@@ -232,6 +258,15 @@ public class Check {
         return hash;
     }
 
+    // 
+    // Both the cache and the local database want/need to read the whole file seperately, so we must save 
+    // the file we are sent locally on the server, so we can read it twice.  We should probably fix this
+    // so we dont' need to do this, but we haven't.   
+    //
+    // For now we create a new temporary directory to store all the files uploaded in one request.  For the
+    // processing to work it's best, it is necessary for the name of the file in the temporary directory be
+    // the name given to the file as part of the upload request.
+    //
     private String createTempDir() throws IOException {
         File t = File.createTempFile("victims", "");
         if (!t.delete()) {
