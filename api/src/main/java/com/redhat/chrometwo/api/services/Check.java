@@ -47,242 +47,7 @@ import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 @LocalBean
 public class Check {
 
-    private int count;
-
-    private String checksum(InputStream body) {
-        String hash = null;
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA1");
-            byte[] buffer = new byte[1024];
-            while (body.read(buffer) > 0) {
-                md.update(buffer);
-            }
-
-            byte[] digest = md.digest();
-            hash = String.format("%0" + (digest.length << 1) + "X", new BigInteger(1, digest));
-
-        } catch (NoSuchAlgorithmException e) {
-        } catch (FileNotFoundException e) {
-        } catch (IOException e) {
-        }
-
-        return hash;
-
-    }
-
-    public String checksum(String filename) {
-        String hash = null;
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA1");
-            InputStream is = new FileInputStream(new File(filename));
-            byte[] buffer = new byte[1024];
-            while (is.read(buffer) > 0) {
-                md.update(buffer);
-            }
-
-            byte[] digest = md.digest();
-            hash = String.format("%0" + (digest.length << 1) + "X", new BigInteger(1, digest));
-
-        } catch (NoSuchAlgorithmException e) {
-        } catch (FileNotFoundException e) {
-        } catch (IOException e) {
-        }
-
-        return hash;
-
-    }
-
-    private String checkOne(VictimsDBInterface db, VictimsResultCache cache, String arg) throws Exception {
-
-            StringBuilder result = new StringBuilder();
-       
-            result.append("filename: ").append(arg).append("\n");
-
-            String key = null;   //checksum(arg);
-            result.append("key: ");
-            result.append(key);
-            result.append("\n");
-            
-            // Check cache 
-            if (key != null && cache.exists(key)) {
-                try {
-                    HashSet<String> cves = cache.get(key);
-                    if (cves != null && cves.size() > 0) {
-                        result.append(String.format("%s VULNERABLE! ", arg));
-                        for (String cve : cves) {
-                            result.append(cve);
-                            result.append(" ");
-                        }
-                        result.append("\n");
-                    } else {
-                        result.append(arg + " ok");
-                    }
-                } catch (VictimsException e) {
-                    result.append("VictimsException while checking cache:\n");
-                    e.printStackTrace();
-                    return result.append(e.toString()).append("\n").toString();
-                }
-            }
-
-            // Scan the item
-            ArrayList<VictimsRecord> records = new ArrayList();
-            try {
-
-                VictimsScanner.scan(arg, records);
-                for (VictimsRecord record : records) {
-
-                    try {
-                        HashSet<String> cves = db.getVulnerabilities(record);
-                        if (key != null) {
-                            cache.add(key, cves);
-                        }
-                        if (!cves.isEmpty()) {
-                            result.append(String.format("%s VULNERABLE! ", arg));
-                            for (String cve : cves) {
-                                result.append(cve);
-                                result.append(" ");
-                            }
-                        } else {
-                            result.append(arg + " ok");
-                        }
-
-                    } catch (VictimsException e) {
-                        result.append("VictimsException while checking database:\n");
-                        e.printStackTrace();
-                        return result.append(e.toString()).append("\n").toString();
-                    }
-                }
-            } catch (IOException e) {
-                result.append("VictimsException while scanning file:\n");
-                e.printStackTrace();
-                return result.append(e.toString()).append("\n").toString();
-            }
-            return result.toString();
-    }
-
-    private String checkOne(VictimsDBInterface db, VictimsResultCache cache, String fileName, InputStream inputStream) throws Exception {
-        StringBuilder result = new StringBuilder();
-       
-        result.append("filename: ").append(fileName).append("\n");
-
-        String key = null;   //checksum(inputStream);
-        result.append("key(" + count + "): ");
-        result.append(key);
-        result.append("\n");
-
-        if (key != null && cache.exists(key)) {
-            try {
-                HashSet<String> cves = cache.get(key);
-                if (cves != null && cves.size() > 0) {
-                    result.append(String.format("cached: %s VULNERABLE! ", fileName));
-                    for (String cve : cves) {
-                        result.append(cve);
-                        result.append(" ");
-                    }
-                    result.append("\n");
-                } else {
-                    result.append("cached: " + fileName + " ok\n");
-                }
-            } catch (VictimsException e) {
-                result.append("VictimsException while checking cache:\n");
-                e.printStackTrace();
-                return result.append(e.toString()).append("\n").toString();
-            }
-        } else {
-            result.append("key is not cached\n");
-        }            
-        
-        // Scan the item
-        ArrayList<VictimsRecord> records = new ArrayList();
-        try {
-            int count = 0;
-            for (VictimsRecord record : VictimsScanner.getRecords(inputStream, fileName)) {
-                count++;
-                result.append("found the " + count + "th record for " + fileName + "\n");
-                try {
-                    HashSet<String> cves = db.getVulnerabilities(record);
-                    if (key != null) {
-                        cache.add(key, cves);
-                    }
-                    if (!cves.isEmpty()) {
-                        result.append(String.format("%s VULNERABLE! ", fileName));
-                        for (String cve : cves) {
-                            result.append(cve);
-                            result.append(" ");
-                        }
-                        result.append("\n");
-                    } else {
-                        result.append(fileName + " ok\n");
-                    }
-                    
-                } catch (VictimsException e) {
-                    result.append("VictimsException while checking database:\n");
-                    e.printStackTrace();
-                    return result.append(e.toString()).append("\n").toString();
-                }
-            }
-            if (count == 0) {
-                result.append("found no records for ").append(fileName).append("\n");
-            }                
-        } catch (IOException e) {
-            result.append("VictimsException while scanning file:\n");
-            e.printStackTrace();
-            return result.append(e.toString()).append("\n").toString();
-        }
-
-        return result.toString();
-    }
-
-    private String displayHeaders(HttpServletRequest request) throws Exception {
-        StringBuilder result = new StringBuilder();
-        for (java.util.Enumeration<java.lang.String> headerNames = request.getHeaderNames();
-             headerNames.hasMoreElements();) {
-            String headerName = headerNames.nextElement();
-            for (java.util.Enumeration<java.lang.String> headers = request.getHeaders(headerName);
-                 headers.hasMoreElements();) {
-                String header = headers.nextElement();
-                result.append(headerName + ": " + header + "\n");
-            }
-        }
-        return result.toString();
-    }
-
-
-
     @POST
-    @Path("/{fileName}")
-    public String checkFile(InputStream body,
-                            @PathParam("fileName") String fileName,
-                            @Context HttpServletRequest request) throws Exception {
-
-        StringBuilder result = new StringBuilder();
-        
-        result.append("check: ");
-        result.append(fileName);
-        result.append("\n");
-        result.append(displayHeaders(request));
-
-        VictimsDBInterface db;
-        VictimsResultCache cache;
-
-        try {
-            db = VictimsDB.db();
-            cache = new VictimsResultCache();
-
-        } catch (VictimsException e) {
-            result.append("VictimsException while opening the database:\n");
-            e.printStackTrace();
-            return result.append(e.toString()).append("\n").toString();
-        }
-
-        result.append(checkOne(db, cache, fileName, body));
-
-        result.append("end of results\n");
-        return result.toString();
-    }
-
-    @POST
-    @Path("/multi")
 	@Consumes({ MediaType.MULTIPART_FORM_DATA })
     public String checkMulti(MultipartFormDataInput inputForm, @Context HttpServletRequest request) throws Exception {
 
@@ -343,9 +108,16 @@ public class Check {
                     fileName = name;
                 }
 
-                String tmpFileName = copyToTempFile(fileName, inputPart.getBody(InputStream.class, null));
+                String tmpFileName = null;
+                try {
+                    tmpFileName = copyToTempFile(fileName, inputPart.getBody(InputStream.class, null));
+                    result.append(checkOne(db, cache, tmpFileName));
 
-                result.append(checkOne(db, cache, tmpFileName));
+                } finally {
+                    if (tmpFileName != null) {
+                        deleteTempFile(tmpFileName);
+                    }
+                }
             }
         }
 
@@ -356,26 +128,124 @@ public class Check {
         return result.toString();
     }
 
+    private String checkOne(VictimsDBInterface db, VictimsResultCache cache, String arg) throws Exception {
+
+            StringBuilder result = new StringBuilder();
+       
+            result.append("filename: ").append(arg).append("\n");
+
+            String key = null;   //checksum(arg);
+            result.append("key: ");
+            result.append(key);
+            result.append("\n");
+            
+            // Check cache 
+            if (key != null && cache.exists(key)) {
+                try {
+                    HashSet<String> cves = cache.get(key);
+                    if (cves != null && cves.size() > 0) {
+                        result.append(String.format("%s VULNERABLE! ", arg));
+                        for (String cve : cves) {
+                            result.append(cve);
+                            result.append(" ");
+                        }
+                        result.append("\n");
+                    } else {
+                        result.append(arg + " ok\n");
+                    }
+                } catch (VictimsException e) {
+                    result.append("VictimsException while checking cache:\n");
+                    e.printStackTrace();
+                    return result.append(e.toString()).append("\n").toString();
+                }
+            }
+
+            // Scan the item
+            ArrayList<VictimsRecord> records = new ArrayList();
+            try {
+
+                VictimsScanner.scan(arg, records);
+                for (VictimsRecord record : records) {
+
+                    try {
+                        HashSet<String> cves = db.getVulnerabilities(record);
+                        if (key != null) {
+                            cache.add(key, cves);
+                        }
+                        if (!cves.isEmpty()) {
+                            result.append(String.format("%s VULNERABLE! ", arg));
+                            for (String cve : cves) {
+                                result.append(cve);
+                                result.append(" ");
+                            }
+                            result.append("\n");
+                        } else {
+                            result.append(arg + " ok\n");
+                        }
+
+                    } catch (VictimsException e) {
+                        result.append("VictimsException while checking database:\n");
+                        e.printStackTrace();
+                        return result.append(e.toString()).append("\n").toString();
+                    }
+                }
+            } catch (IOException e) {
+                result.append("VictimsException while scanning file:\n");
+                e.printStackTrace();
+                return result.append(e.toString()).append("\n").toString();
+            }
+            return result.toString();
+    }
+
+    private String displayHeaders(HttpServletRequest request) throws Exception {
+        StringBuilder result = new StringBuilder();
+        for (java.util.Enumeration<java.lang.String> headerNames = request.getHeaderNames();
+             headerNames.hasMoreElements();) {
+            String headerName = headerNames.nextElement();
+            for (java.util.Enumeration<java.lang.String> headers = request.getHeaders(headerName);
+                 headers.hasMoreElements();) {
+                String header = headers.nextElement();
+                result.append(headerName + ": " + header + "\n");
+            }
+        }
+        return result.toString();
+    }
+
+    private String checksum(String filename) {
+        String hash = null;
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA1");
+            InputStream is = new FileInputStream(new File(filename));
+            byte[] buffer = new byte[1024];
+            while (is.read(buffer) > 0) {
+                md.update(buffer);
+            }
+
+            byte[] digest = md.digest();
+            hash = String.format("%0" + (digest.length << 1) + "X", new BigInteger(1, digest));
+
+        } catch (NoSuchAlgorithmException e) {
+        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
+        }
+
+        return hash;
+    }
+
     private String createTempDir() throws IOException {
         File t = File.createTempFile("victims", "");
-        System.out.println("directory tempfile name: " + t.getAbsolutePath());
         if (!t.delete()) {
-            System.out.println("could not delete tempfile before creating directory: " + t.getAbsolutePath());
             throw new IOException("could not delete tempfile before creating directory: " + t.getAbsolutePath());
         }
-        System.out.println("deleted tempfile name: " + t.getAbsolutePath());
         if (!t.mkdir()) {
-            System.out.println("could not create directory: " + t.getAbsolutePath());
             throw new IOException("could not create directory: " + t.getAbsolutePath());
         }
-        System.out.println("tempdir name: " + t.getAbsolutePath());
         return t.getAbsolutePath();
     }
 
 
     private String copyToTempFile(String fileName, InputStream inputStream) throws IOException {
         File n = new File(createTempDir(), fileName);
-        System.out.println("tempfile name: " + n.getAbsolutePath());
         OutputStream outputStream = new FileOutputStream(n);
 
         int count = 0;
@@ -389,12 +259,8 @@ public class Check {
     }
 
     private void deleteTempFile(String fileName) {
-        System.out.println("deleteTempFile called on: " + fileName);
         File n = new File(fileName);
         n.delete();
         n.getParentFile().delete();
     }
-
-
-
 }
