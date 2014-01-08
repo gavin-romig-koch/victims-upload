@@ -1,5 +1,6 @@
 This is the deployment directory for an OpenShift app.
 
+
 This webapp provided a frontend to the http://victi.ms application.  This webapp allows one to upload files for checking against the http://victi.ms database.  It does this simply by putting a webapp wrapper around the client functionality provided by http://victi.ms. 
 
 So far this just consists of a tiny http api which allows one to upload one or more files in a mime multipart form-data post.   The api syncronizes it's own local copy of the victims db with the upstream one at 'victi.ms', and looks at the uploaded files to see if any have any CVE's listed in that db.   The api only handles, and db only contain, info for 'jar' files, 'class' files and 'pom.xml' files.   The api only looks at the name of the file (the part after the last dot) to tell what kind of file it is, so post the files with proper/actual names.   An instance of this api is on the internal openshift at:
