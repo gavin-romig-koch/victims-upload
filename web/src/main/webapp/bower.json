@@ -1,0 +1,21 @@
+{
+    "name": "Embedded Vulnerability Detector",
+    "version": "0.0.1",
+    "authors": [
+      "Dan Varga <dvarga@redhat.com>"
+    ],
+    "private": true,
+    "ignore": [
+      "**.*",
+      "node_modules",
+      "bower_components",
+      "resources/js/bower_components",
+      "test",
+      "tests"
+    ],
+    "dependencies": {
+        "jquery": "~2.0.3",
+        "requirejs": "~2.1.9",
+        "bootstrap": "~3.0.3"
+    }
+}

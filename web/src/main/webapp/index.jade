@@ -1,0 +1,42 @@
+doctype html
+
+html(lang="en").chrometwo
+    head
+        script(type="text/javascript").
+            window.pstart = new Date().getTime();
+            console.log("Start: " + window.pstart);
+        title Embedded Vulnerability Detection
+        link(href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css",rel="stylesheet")
+        link(href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css",rel="stylesheet")
+        // The overrides needs to come after the application css
+        // Need in chrome2.css, look at source of http://handsbox-portal.usersys.redhat.com/pass/chrome_test/
+        script(data-main="/webassets/avalon/j/chrometwo",src="/webassets/avalon/j/lib/require.js")
+        link(href="/webassets/avalon/s/bootstrap3.overrides.css", rel="stylesheet")
+    body.chrometwo
+        div#chrometwo
+            div#main
+                // Content area is required as per instruction from Marc Caron, otherwise box styling not honored
+                div.content-area
+                    div.row
+                        div.col-lg-6
+                            h4 Embedded Vulnerability Detection
+                            hr
+                            div.spacer.clearfix
+                            form.form-horizontal(role="form")
+                                div.form-group
+                                    label.col-sm-12
+                                        | Please select a JAR, POM, or Java Class file to analyze&nbsp;
+                                        span.fa.fa-question-circle(tooltip-html-unsafe="Only .jar, .class, and ,pom files are supported", tooltip-placement="bottom") &nbsp;
+                                    div.col-sm-4
+                                        input(type="file")
+                                    div.col-sm-1
+                                        button.btn.btn-default(type="submit").
+                                            Submit
+
+                        div.col-lg-6
+                            h4 Vulnerabilities Found
+                            hr
+                            div.spacer.clearfix
+        script(type="text/javascript").
+            chrometwo_require([], function() {
+            });
