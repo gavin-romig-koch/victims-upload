@@ -3,15 +3,14 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>com.redhat.chrometwo</groupId>
-    <artifactId>cloud</artifactId>
+    <groupId>com.redhat.gss</groupId>
     <version>1.0</version>
+    <artifactId>victims-upload</artifactId>
   </parent>
-  <groupId>com.redhat.chrometwo.web</groupId>
-  <artifactId>web</artifactId>
-  <version>0.9</version>
+  <name>Victims Upload Web interface</name>
+  <groupId>com.redhat.gss</groupId>
+  <artifactId>victims-upload-web</artifactId>
   <packaging>war</packaging>
-  <name>chrometwo web subproject</name>
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
