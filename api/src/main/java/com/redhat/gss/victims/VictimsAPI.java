@@ -1,4 +1,4 @@
-package com.redhat.chrometwo.api.services;
+package com.redhat.gss.victims;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -13,7 +13,6 @@ public class VictimsAPI extends Application {
     @Override
     public Set<Class<?>> getClasses() {
         final HashSet<Class<?>> set = new HashSet<Class<?>>();
-        set.add(AccountWS.class);
         set.add(Check.class);
 
         return set;

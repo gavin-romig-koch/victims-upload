@@ -1,4 +1,4 @@
-package com.redhat.chrometwo.api.services;
+package com.redhat.gss.victims;
 
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
