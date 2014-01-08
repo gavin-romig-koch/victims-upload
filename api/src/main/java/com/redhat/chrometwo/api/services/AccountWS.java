@@ -25,7 +25,7 @@ public class AccountWS {
     public String getAccount(@PathParam("accountId") String accountId,
     						  @Context HttpServletRequest request) throws Exception {
     	// Lookey test code remove me:
-        //    	System.out.println(accountDao.doSomeBackendFunction());
+    	System.out.println(accountDao.doSomeBackendFunction());
     	System.out.println(request.getAttribute(SecurityInterceptor.ACCOUNT_ID));
     	System.out.println(request.getAttribute(SecurityInterceptor.USER_ID));
     	System.out.println(request.getAttribute(SecurityInterceptor.IS_INTERNAL));
