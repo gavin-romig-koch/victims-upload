@@ -122,14 +122,14 @@ public class CheckMate {
             cache = new VictimsResultCache();
 
         } catch (VictimsException e) {
-            result.append("VictimsException while opening the database:\n");
+            StringBuilder error = new StringBuilder();
+            error.append("VictimsException while opening the database:\n");
             e.printStackTrace();
-            result.append(e.toString()).append("\n");
+            error.append(e.toString()).append("\n");
 
             CheckResult checkResult = new CheckResult();
-            checkResult.setData(result.toString());
             checkResult.setTrace(trace.toString());
-            checkResult.setError("No Error Found");
+            checkResult.setError(error.toString());
             return checkResult;
         }
 
@@ -143,14 +143,14 @@ public class CheckMate {
             }
 
         } catch (VictimsException e) {
-            result.append("VictimsException while synchronize-ing local database:\n");
+            StringBuilder error = new StringBuilder();
+            error.append("VictimsException while synchronize-ing local database:\n");
             e.printStackTrace();
-            result.append(e.toString()).append("\n");
+            error.append(e.toString()).append("\n");
 
             CheckResult checkResult = new CheckResult();
-            checkResult.setData(result.toString());
             checkResult.setTrace(trace.toString());
-            checkResult.setError("No Error Found");
+            checkResult.setError(error.toString());
             return checkResult;
         }
 
@@ -203,7 +203,6 @@ public class CheckMate {
         CheckResult checkResult = new CheckResult();
         checkResult.setData(result.toString());
         checkResult.setTrace(trace.toString());
-        checkResult.setError("No Error Found");
 
         return checkResult;
     }
