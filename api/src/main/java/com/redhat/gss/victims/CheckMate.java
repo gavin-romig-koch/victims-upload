@@ -153,7 +153,7 @@ public class CheckMate {
 	@Produces({ MediaType.APPLICATION_XML, MediaType.TEXT_XML, MediaType.APPLICATION_JSON })
     public CheckResult checkMultiJAXB(MultipartFormDataInput inputForm, @Context HttpServletRequest request) throws Exception {
 
-        StringBuilder result = new StringBuilder();
+        CheckResult checkResult = new CheckResult();
         StringBuilder trace = new StringBuilder();
         
         trace.append("multi: ");
@@ -172,10 +172,10 @@ public class CheckMate {
             e.printStackTrace();
             error.append(e.toString()).append("\n");
 
-            CheckResult checkResult = new CheckResult();
-            checkResult.setTrace(trace.toString());
-            checkResult.setError(error.toString());
-            return checkResult;
+            CheckResult errorResult = new CheckResult();
+            errorResult.setTrace(trace.toString());
+            errorResult.setError(error.toString());
+            return errorResult;
         }
 
         try {
@@ -189,10 +189,10 @@ public class CheckMate {
             e.printStackTrace();
             error.append(e.toString()).append("\n");
 
-            CheckResult checkResult = new CheckResult();
-            checkResult.setTrace(trace.toString());
-            checkResult.setError(error.toString());
-            return checkResult;
+            CheckResult errorResult = new CheckResult();
+            errorResult.setTrace(trace.toString());
+            errorResult.setError(error.toString());
+            return errorResult;
         }
 
 
@@ -226,7 +226,7 @@ public class CheckMate {
                 String tmpFileName = null;
                 try {
                     tmpFileName = copyToTempFile(fileName, inputPart.getBody(InputStream.class, null));
-                    result.append(checkOne(db, cache, tmpFileName));
+                    checkResult.addData(checkOne(db, cache, tmpFileName));
 
                 } finally {
                     if (tmpFileName != null) {
@@ -241,8 +241,6 @@ public class CheckMate {
         }
         trace.append("end of results\n");
 
-        CheckResult checkResult = new CheckResult();
-        checkResult.setData(result.toString());
         //checkResult.setTrace(trace.toString());
 
         return checkResult;
@@ -361,18 +359,24 @@ public class CheckMate {
         return hash;
     }
 
+
     @XmlRootElement(name = "checkresult")
     static public class CheckResult {
 
-        private String data;
+        private List<String> datas;
 
-        public void setData(String data) {
-            this.data = data;
+        public void addData(String data) {
+            if (data != null && !data.isEmpty()) {
+                if (this.datas == null) {
+                    datas = new ArrayList<String>();
+                }
+                this.datas.add(data);
+            }
         }
 
         @XmlElement
-        public String getData() {
-            return data;
+        public List<String> getData() {
+            return datas;
         }
 
         private String trace;
