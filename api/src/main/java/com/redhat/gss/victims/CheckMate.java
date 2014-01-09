@@ -52,7 +52,7 @@ import javax.xml.bind.annotation.XmlElement;
 public class CheckMate {
 
     @XmlRootElement(name = "checkresult")
-    public class CheckResult {
+    static public class CheckResult {
 
         private String data;
 
