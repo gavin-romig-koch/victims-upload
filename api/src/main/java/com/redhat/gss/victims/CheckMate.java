@@ -138,6 +138,10 @@ public class CheckMate {
             db.synchronize();
             trace.append("   successful synchronize.\n");
 
+            if (result != null) {
+                throw new VictimsException("This is just a test.");
+            }
+
         } catch (VictimsException e) {
             result.append("VictimsException while synchronize-ing local database:\n");
             e.printStackTrace();
