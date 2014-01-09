@@ -131,7 +131,31 @@ public class CheckMate {
                 String tmpFileName = null;
                 try {
                     tmpFileName = copyToTempFile(fileName, inputPart.getBody(InputStream.class, null));
-                    result.append(checkOne(db, cache, tmpFileName));
+
+                    try {
+                        CheckResultElement checkResultElement = checkOne(db, cache, tmpFileName);
+                        String checkFileName = checkResultElement.getFile();
+                        List<String> cves = checkResultElement.getVulnerabilities();
+                        if (cves != null && cves.size() > 0) {
+                            result.append(String.format("%s VULNERABLE! ", checkFileName));
+                            for (String cve : cves) {
+                                result.append(cve);
+                                result.append(" ");
+                            }
+                            result.append("\n");
+                        } else {
+                            result.append(checkFileName + " ok\n");
+                        }
+
+                    } catch (VictimsException e) {
+                        result.append("VictimsException while checking:\n");
+                        e.printStackTrace();
+                        return result.append(e.toString()).append("\n").toString();
+                    } catch (IOException e) {
+                        result.append("VictimsException while checking:\n");
+                        e.printStackTrace();
+                        return result.append(e.toString()).append("\n").toString();
+                    }
 
                 } finally {
                     if (tmpFileName != null) {
@@ -226,7 +250,30 @@ public class CheckMate {
                 String tmpFileName = null;
                 try {
                     tmpFileName = copyToTempFile(fileName, inputPart.getBody(InputStream.class, null));
-                    checkResult.addData(checkOne(db, cache, tmpFileName));
+                    try {
+                        checkResult.addData(checkOne(db, cache, tmpFileName));
+
+                    } catch (VictimsException e) {
+                        StringBuilder error = new StringBuilder();
+                        error.append("VictimsException while checking:\n");
+                        e.printStackTrace();
+                        error.append(e.toString()).append("\n");
+
+                        CheckResult errorResult = new CheckResult();
+                        errorResult.setTrace(trace.toString());
+                        errorResult.setError(error.toString());
+                        return errorResult;
+                    } catch (IOException e) {
+                        StringBuilder error = new StringBuilder();
+                        error.append("VictimsException while checking:\n");
+                        e.printStackTrace();
+                        error.append(e.toString()).append("\n");
+
+                        CheckResult errorResult = new CheckResult();
+                        errorResult.setTrace(trace.toString());
+                        errorResult.setError(error.toString());
+                        return errorResult;
+                    }
 
                 } finally {
                     if (tmpFileName != null) {
@@ -246,82 +293,67 @@ public class CheckMate {
         return checkResult;
     }
 
-    private String checkOne(VictimsDBInterface db, VictimsResultCache cache, String tmpFileName) throws Exception {
+    private CheckResultElement checkOne(VictimsDBInterface db, VictimsResultCache cache, String tmpFileName) throws Exception {
         // tmpFileName is the full (absolute) file name of the temporary copy of the uploaded file
         // it's last path element should be the name of the file that the user attached to it in the uploaded request
  
-            String fileName = new File(tmpFileName).getName();
+        String fileName = new File(tmpFileName).getName();
 
-            StringBuilder result = new StringBuilder();
-            StringBuilder trace = new StringBuilder();
+        StringBuilder trace = new StringBuilder();
        
-            trace.append("filename: ").append(tmpFileName).append("\n");
+        trace.append("filename: ").append(tmpFileName).append("\n");
 
-            // the cache was giving incorrect results (saying things were OK when they were not, 
-            // or vise-versa.  It may be behaving this way because i was screwing with the local 
-            // database alot while i was getting this working, or there may be some deeper problem.
-            // for now just turn off the cache.
-            String key = null;   //checksum(tmpFileName);
-            trace.append("key: ");
-            trace.append(key);
-            trace.append("\n");
+        // the cache was giving incorrect results (saying things were OK when they were not, 
+        // or vise-versa.  It may be behaving this way because i was screwing with the local 
+        // database alot while i was getting this working, or there may be some deeper problem.
+        // for now just turn off the cache.
+        String key = null;   //checksum(tmpFileName);
+        trace.append("key: ");
+        trace.append(key);
+        trace.append("\n");
             
-            // Check cache 
-            if (key != null && cache.exists(key)) {
-                try {
-                    HashSet<String> cves = cache.get(key);
-                    if (cves != null && cves.size() > 0) {
-                        result.append(String.format("%s VULNERABLE! ", fileName));
-                        for (String cve : cves) {
-                            result.append(cve);
-                            result.append(" ");
-                        }
-                        result.append("\n");
-                    } else {
-                        result.append(fileName + " ok\n");
-                    }
-                } catch (VictimsException e) {
-                    result.append("VictimsException while checking cache:\n");
-                    e.printStackTrace();
-                    return result.append(e.toString()).append("\n").toString();
+        // Check cache 
+        if (key != null && cache.exists(key)) {
+            CheckResultElement checkResultElement = new CheckResultElement();
+            checkResultElement.setFile(fileName);
+            HashSet<String> cves = cache.get(key);
+            if (cves != null && cves.size() > 0) {
+                trace.append(String.format("%s VULNERABLE! ", fileName));
+                for (String cve : cves) {
+                    checkResultElement.addVulnerability(cve);
+                    trace.append(cve);
+                    trace.append(" ");
                 }
+                trace.append("\n");
+            } else {
+                trace.append(fileName + " ok\n");
             }
+            return checkResultElement;
+        }
 
-            // Scan the item
-            ArrayList<VictimsRecord> records = new ArrayList();
-            try {
-
-                VictimsScanner.scan(tmpFileName, records);
-                for (VictimsRecord record : records) {
-
-                    try {
-                        HashSet<String> cves = db.getVulnerabilities(record);
-                        if (key != null) {
-                            cache.add(key, cves);
-                        }
-                        if (!cves.isEmpty()) {
-                            result.append(String.format("%s VULNERABLE! ", fileName));
-                            for (String cve : cves) {
-                                result.append(cve);
-                                result.append(" ");
-                            }
-                            result.append("\n");
-                        } else {
-                            result.append(fileName + " ok\n");
-                        }
-
-                    } catch (VictimsException e) {
-                        result.append("VictimsException while checking database:\n");
-                        e.printStackTrace();
-                        return result.append(e.toString()).append("\n").toString();
-                    }
+        // Scan the item
+        ArrayList<VictimsRecord> records = new ArrayList();
+        VictimsScanner.scan(tmpFileName, records);
+        CheckResultElement checkResultElement = new CheckResultElement();
+        checkResultElement.setFile(fileName);
+        for (VictimsRecord record : records) {
+            HashSet<String> cves = db.getVulnerabilities(record);
+            if (key != null) {
+                cache.add(key, cves);
+            }
+            if (!cves.isEmpty()) {
+                trace.append(String.format("%s VULNERABLE! ", fileName));
+                for (String cve : cves) {
+                    checkResultElement.addVulnerability(cve);
+                    trace.append(cve);
+                    trace.append(" ");
                 }
-            } catch (IOException e) {
-                result.append("VictimsException while scanning file:\n");
-                e.printStackTrace();
-                return result.append(e.toString()).append("\n").toString();
+                trace.append("\n");
+            } else {
+                trace.append(fileName + " ok\n");
             }
-            return result.toString();
+        }
+        return checkResultElement;
     }
 
     private String displayHeaders(HttpServletRequest request) throws Exception {
@@ -359,23 +391,50 @@ public class CheckMate {
         return hash;
     }
 
+    static public class CheckResultElement {
+        private String file;
+
+        @XmlElement 
+        public String getFile() {
+            return file;
+        }
+
+        public void setFile(String file) {
+            this.file = file;
+        }
+
+        private List<String> vulnerabilities;
+
+        @XmlElement 
+        public List<String> getVulnerabilities() {
+            return vulnerabilities;
+        }
+
+        public void addVulnerability(String vulnerability) {
+            if (vulnerability != null && !vulnerability.isEmpty()) {
+                if (this.vulnerabilities == null) {
+                    this.vulnerabilities = new ArrayList<String>();
+                }
+                this.vulnerabilities.add(vulnerability);
+            }
+        }
+    }
+
 
     @XmlRootElement(name = "checkresult")
     static public class CheckResult {
 
-        private List<String> datas;
+        private List<CheckResultElement> datas;
 
-        public void addData(String data) {
-            if (data != null && !data.isEmpty()) {
-                if (this.datas == null) {
-                    datas = new ArrayList<String>();
-                }
-                this.datas.add(data);
+        public void addData(CheckResultElement data) {
+            if (this.datas == null) {
+                this.datas = new ArrayList<CheckResultElement>();
             }
+            this.datas.add(data);
         }
 
         @XmlElement
-        public List<String> getData() {
+        public List<CheckResultElement> getData() {
             return datas;
         }
 
