@@ -51,43 +51,6 @@ import javax.xml.bind.annotation.XmlElement;
 @LocalBean
 public class CheckMate {
 
-    @XmlRootElement(name = "checkresult")
-    static public class CheckResult {
-
-        private String data;
-
-        public void setData(String data) {
-            this.data = data;
-        }
-
-        @XmlElement
-        public String getData() {
-            return data;
-        }
-
-        private String trace;
-
-        public void setTrace(String trace) {
-            this.trace = trace;
-        }
-
-        @XmlElement
-        public String getTrace() {
-            return trace;
-        }
-
-        private String error;
-
-        public void setError(String error) {
-            this.error = error;
-        }
-
-        @XmlElement
-        public String getError() {
-            return error;
-        }
-    }
-
     public CheckMate() {
 
         // This is done at initializer time so that if we have to create a 
@@ -105,7 +68,89 @@ public class CheckMate {
 
     @POST
 	@Consumes({ MediaType.MULTIPART_FORM_DATA })
-	@Produces("application/xml")
+    public String checkMultiString(MultipartFormDataInput inputForm, @Context HttpServletRequest request) throws Exception {
+
+        StringBuilder result = new StringBuilder();
+        StringBuilder trace = new StringBuilder();
+        
+        trace.append("multi: ");
+        trace.append(displayHeaders(request));
+
+        VictimsDBInterface db;
+        VictimsResultCache cache;
+
+        try {
+            db = VictimsDB.db();
+            cache = new VictimsResultCache();
+
+        } catch (VictimsException e) {
+            result.append("VictimsException while opening the database:\n");
+            e.printStackTrace();
+            return result.append(e.toString()).append("\n").toString();
+        }
+
+        try {
+            trace.append("About to synchronize local database with upstream ...\n");
+            db.synchronize();
+            trace.append("   successful synchronize.\n");
+
+        } catch (VictimsException e) {
+            result.append("VictimsException while synchronize-ing local database:\n");
+            e.printStackTrace();
+            return result.append(e.toString()).append("\n").toString();
+        }
+
+
+        boolean foundAtLeastOne = false;
+        Map<String, List<InputPart>> multiValuedMap = inputForm.getFormDataMap();
+        for (Map.Entry<String, List<InputPart>> entry : multiValuedMap.entrySet()) {
+            foundAtLeastOne = true;
+            String name = entry.getKey();
+            int count = 0;
+            trace.append("found part named: " + name + "\n");
+            for (InputPart inputPart : entry.getValue()) {
+                String dispString = "";
+                count++;
+                trace.append("found value " + count + ":\n");
+                for (Map.Entry<String, List<String>> headerEntry : inputPart.getHeaders().entrySet()) {
+                    for (String headerValue : headerEntry.getValue()) {
+                        trace.append("  header " + headerEntry.getKey() + ": " + headerValue).append("\n");
+                        if (headerEntry.getKey().equals("Content-Disposition")) {
+                            dispString += headerValue;
+                        }
+                    }
+                }
+                trace.append("  mediaType: " + inputPart.getMediaType() + "\n");
+
+                ContentDisposition disp = new ContentDisposition(dispString);
+                String fileName = disp.getParameter("filename");
+                if (fileName == null) {
+                    fileName = name;
+                }
+
+                String tmpFileName = null;
+                try {
+                    tmpFileName = copyToTempFile(fileName, inputPart.getBody(InputStream.class, null));
+                    result.append(checkOne(db, cache, tmpFileName));
+
+                } finally {
+                    if (tmpFileName != null) {
+                        deleteTempFile(tmpFileName);
+                    }
+                }
+            }
+        }
+
+        if (!foundAtLeastOne) {
+            trace.append("no parts found\n");
+        }
+        trace.append("end of results\n");
+        return result.toString();
+    }
+
+    @POST
+	@Consumes({ MediaType.MULTIPART_FORM_DATA })
+	@Produces({ MediaType.APPLICATION_XML, MediaType.TEXT_XML, MediaType.APPLICATION_JSON })
     public CheckResult checkMultiJAXB(MultipartFormDataInput inputForm, @Context HttpServletRequest request) throws Exception {
 
         StringBuilder result = new StringBuilder();
@@ -198,91 +243,9 @@ public class CheckMate {
 
         CheckResult checkResult = new CheckResult();
         checkResult.setData(result.toString());
-        checkResult.setTrace(trace.toString());
+        //checkResult.setTrace(trace.toString());
 
         return checkResult;
-    }
-
-    @POST
-	@Consumes({ MediaType.MULTIPART_FORM_DATA })
-    public String checkMultiString(MultipartFormDataInput inputForm, @Context HttpServletRequest request) throws Exception {
-
-        StringBuilder result = new StringBuilder();
-        StringBuilder trace = new StringBuilder();
-        
-        trace.append("multi: ");
-        trace.append(displayHeaders(request));
-
-        VictimsDBInterface db;
-        VictimsResultCache cache;
-
-        try {
-            db = VictimsDB.db();
-            cache = new VictimsResultCache();
-
-        } catch (VictimsException e) {
-            result.append("VictimsException while opening the database:\n");
-            e.printStackTrace();
-            return result.append(e.toString()).append("\n").toString();
-        }
-
-        try {
-            trace.append("About to synchronize local database with upstream ...\n");
-            db.synchronize();
-            trace.append("   successful synchronize.\n");
-
-        } catch (VictimsException e) {
-            result.append("VictimsException while synchronize-ing local database:\n");
-            e.printStackTrace();
-            return result.append(e.toString()).append("\n").toString();
-        }
-
-
-        boolean foundAtLeastOne = false;
-        Map<String, List<InputPart>> multiValuedMap = inputForm.getFormDataMap();
-        for (Map.Entry<String, List<InputPart>> entry : multiValuedMap.entrySet()) {
-            foundAtLeastOne = true;
-            String name = entry.getKey();
-            int count = 0;
-            trace.append("found part named: " + name + "\n");
-            for (InputPart inputPart : entry.getValue()) {
-                String dispString = "";
-                count++;
-                trace.append("found value " + count + ":\n");
-                for (Map.Entry<String, List<String>> headerEntry : inputPart.getHeaders().entrySet()) {
-                    for (String headerValue : headerEntry.getValue()) {
-                        trace.append("  header " + headerEntry.getKey() + ": " + headerValue).append("\n");
-                        if (headerEntry.getKey().equals("Content-Disposition")) {
-                            dispString += headerValue;
-                        }
-                    }
-                }
-                trace.append("  mediaType: " + inputPart.getMediaType() + "\n");
-
-                ContentDisposition disp = new ContentDisposition(dispString);
-                String fileName = disp.getParameter("filename");
-                if (fileName == null) {
-                    fileName = name;
-                }
-
-                String tmpFileName = null;
-                try {
-                    tmpFileName = copyToTempFile(fileName, inputPart.getBody(InputStream.class, null));
-                    result.append(checkOne(db, cache, tmpFileName));
-
-                } finally {
-                    if (tmpFileName != null) {
-                        deleteTempFile(tmpFileName);
-                    }
-                }
-            }
-        }
-
-        if (!foundAtLeastOne) {
-            trace.append("no parts found\n");
-        }
-        trace.append("end of results\n");
-        return result.toString();
     }
 
     private String checkOne(VictimsDBInterface db, VictimsResultCache cache, String tmpFileName) throws Exception {
@@ -396,6 +359,43 @@ public class CheckMate {
         }
 
         return hash;
+    }
+
+    @XmlRootElement(name = "checkresult")
+    static public class CheckResult {
+
+        private String data;
+
+        public void setData(String data) {
+            this.data = data;
+        }
+
+        @XmlElement
+        public String getData() {
+            return data;
+        }
+
+        private String trace;
+
+        public void setTrace(String trace) {
+            this.trace = trace;
+        }
+
+        @XmlElement
+        public String getTrace() {
+            return trace;
+        }
+
+        private String error;
+
+        public void setError(String error) {
+            this.error = error;
+        }
+
+        @XmlElement
+        public String getError() {
+            return error;
+        }
     }
 
     // 
