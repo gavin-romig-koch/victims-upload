@@ -22,21 +22,63 @@ html(lang="en").chrometwo
                             h4 Embedded Vulnerability Detection
                             hr
                             div.spacer.clearfix
-                            form.form-horizontal(role="form")
+                            form#upload-form.form-horizontal(role="form", enctype="multipart/form-data")
                                 div.form-group
                                     label.col-sm-12
                                         | Please select a JAR, POM, or Java Class file to analyze&nbsp;
-                                        span.fa.fa-question-circle(tooltip-html-unsafe="Only .jar, .class, and ,pom files are supported", tooltip-placement="bottom") &nbsp;
+                                        //span.fa.fa-question-circle(tooltip-html-unsafe="Only .jar, .class, and ,pom files are supported", tooltip-placement="bottom") &nbsp;
                                     div.col-sm-4
-                                        input(type="file")
+                                        input#upload(type="file")
                                     div.col-sm-1
-                                        button.btn.btn-default(type="submit").
+                                        button#form-submit.btn.btn-default(type="submit").
                                             Submit
 
                         div.col-lg-6
                             h4 Vulnerabilities Found
                             hr
                             div.spacer.clearfix
+                            div#results
+
         script(type="text/javascript").
             chrometwo_require([], function() {
+                $("#upload").change(function() {
+                    //TODO: File Name Validation
+                    var file = this.files[0];
+                    var name = file.name;
+                    var ext = name.split('.').pop();
+                    if (ext !== "class" && ext !== "jar" && ext !== "pom") {
+                        alert("Invalid file extension");
+                        return false;
+                    }
+                });
+                $('#form-submit').on('click', function (evt) {
+                    evt.preventDefault();
+                    var filename = $("#upload").val();
+                    if (filename === "") {
+                        alert("Please select a file to upload");
+                        return false;
+                    }
+                    var lastIndex = filename.lastIndexOf("\\");
+                    if (lastIndex >= 0) {
+                        filename = filename.substring(lastIndex + 1);
+                    }
+                    var ext = filename.split('.').pop();
+                    if (ext !== "class" && ext !== "jar" && ext !== "pom") {
+                        alert("Invalid file extension");
+                        return false;
+                    }
+                    $("#upload").prop("name", filename);
+                    var formData = new FormData($("#upload-form")[0]);
+                    $.ajax({
+                        url: 'api/check',
+                        type: 'POST',
+                        success: function(response) {
+                            $("#results").html(response);
+                        },
+                        data: formData,
+                        cache: false,
+                        contentType: false,
+                        processData: false
+                    });
+                });
             });
