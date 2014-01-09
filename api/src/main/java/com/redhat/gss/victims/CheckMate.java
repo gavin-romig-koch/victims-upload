@@ -72,9 +72,21 @@ public class CheckMate {
 
         StringBuilder result = new StringBuilder();
         StringBuilder trace = new StringBuilder();
-        
+
         trace.append("multi: ");
         trace.append(displayHeaders(request));
+
+        boolean foundTraceMarker = false;
+        String[] values = request.getParameterValues("trace");
+        if (values != null) {
+            foundTraceMarker = true;
+            for (String value : values ) {
+                trace.append("trace value: " + value);
+            }
+        } else {
+            trace.append("trace value: null\n");
+        }
+
 
         VictimsDBInterface db;
         VictimsResultCache cache;
@@ -102,13 +114,12 @@ public class CheckMate {
 
 
         boolean foundAtLeastOne = false;
-        boolean foundDebugMarker = false;
         Map<String, List<InputPart>> multiValuedMap = inputForm.getFormDataMap();
         for (Map.Entry<String, List<InputPart>> entry : multiValuedMap.entrySet()) {
             foundAtLeastOne = true;
             String name = entry.getKey();
             if (name.equals("victimsdebug")) {
-                foundDebugMarker = true;
+                foundTraceMarker = true;
             }
             int count = 0;
             trace.append("found part named: " + name + "\n");
@@ -174,7 +185,7 @@ public class CheckMate {
         }
         trace.append("end of results\n");
 
-        if (foundDebugMarker) {
+        if (foundTraceMarker) {
             result.append("\n\n");
             result.append(trace);
         }
@@ -192,6 +203,17 @@ public class CheckMate {
         
         trace.append("multi: ");
         trace.append(displayHeaders(request));
+
+        boolean foundTraceMarker = false;
+        String[] values = request.getParameterValues("trace");
+        if (values != null) {
+            foundTraceMarker = true;
+            for (String value : values ) {
+                trace.append("trace value: " + value);
+            }
+        } else {
+            trace.append("trace value: null\n");
+        }
 
         VictimsDBInterface db;
         VictimsResultCache cache;
@@ -231,13 +253,12 @@ public class CheckMate {
 
 
         boolean foundAtLeastOne = false;
-        boolean foundDebugMarker = false;
         Map<String, List<InputPart>> multiValuedMap = inputForm.getFormDataMap();
         for (Map.Entry<String, List<InputPart>> entry : multiValuedMap.entrySet()) {
             foundAtLeastOne = true;
             String name = entry.getKey();
             if (name.equals("victimsdebug")) {
-                foundDebugMarker = true;
+                foundTraceMarker = true;
             }
             int count = 0;
             trace.append("found part named: " + name + "\n");
@@ -302,7 +323,7 @@ public class CheckMate {
         }
         trace.append("end of results\n");
 
-        if (foundDebugMarker) {
+        if (foundTraceMarker) {
             checkResult.setTrace(trace.toString());
         }
 
