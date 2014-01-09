@@ -102,10 +102,14 @@ public class CheckMate {
 
 
         boolean foundAtLeastOne = false;
+        boolean foundDebugMarker = false;
         Map<String, List<InputPart>> multiValuedMap = inputForm.getFormDataMap();
         for (Map.Entry<String, List<InputPart>> entry : multiValuedMap.entrySet()) {
             foundAtLeastOne = true;
             String name = entry.getKey();
+            if (name.equals("victimsdebug")) {
+                foundDebugMarker = true;
+            }
             int count = 0;
             trace.append("found part named: " + name + "\n");
             for (InputPart inputPart : entry.getValue()) {
@@ -169,6 +173,12 @@ public class CheckMate {
             trace.append("no parts found\n");
         }
         trace.append("end of results\n");
+
+        if (foundDebugMarker) {
+            result.append("\n\n");
+            result.append(trace);
+        }
+
         return result.toString();
     }
 
@@ -221,10 +231,14 @@ public class CheckMate {
 
 
         boolean foundAtLeastOne = false;
+        boolean foundDebugMarker = false;
         Map<String, List<InputPart>> multiValuedMap = inputForm.getFormDataMap();
         for (Map.Entry<String, List<InputPart>> entry : multiValuedMap.entrySet()) {
             foundAtLeastOne = true;
             String name = entry.getKey();
+            if (name.equals("victimsdebug")) {
+                foundDebugMarker = true;
+            }
             int count = 0;
             trace.append("found part named: " + name + "\n");
             for (InputPart inputPart : entry.getValue()) {
@@ -288,7 +302,9 @@ public class CheckMate {
         }
         trace.append("end of results\n");
 
-        //checkResult.setTrace(trace.toString());
+        if (foundDebugMarker) {
+            checkResult.setTrace(trace.toString());
+        }
 
         return checkResult;
     }
