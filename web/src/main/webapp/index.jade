@@ -7,7 +7,6 @@ html(lang="en").chrometwo
             console.log("Start: " + window.pstart);
         title Embedded Vulnerability Detection
         link(href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css",rel="stylesheet")
-        link(href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css",rel="stylesheet")
         // The overrides needs to come after the application css
         // Need in chrome2.css, look at source of http://handsbox-portal.usersys.redhat.com/pass/chrome_test/
         script(data-main="/webassets/avalon/j/chrometwo",src="/webassets/avalon/j/lib/require.js")
@@ -26,7 +25,6 @@ html(lang="en").chrometwo
                                 div.form-group
                                     label.col-sm-12
                                         | Please select a JAR, POM, or Java Class file to analyze&nbsp;
-                                        //span.fa.fa-question-circle(tooltip-html-unsafe="Only .jar, .class, and ,pom files are supported", tooltip-placement="bottom") &nbsp;
                                     div.col-sm-4
                                         input#upload(type="file")
                                     div.col-sm-1
@@ -41,8 +39,9 @@ html(lang="en").chrometwo
 
         script(type="text/javascript").
             chrometwo_require([], function() {
+                $("head").prepend("<link rel=\"stylesheet\" type=\"text/css\" media=\"all\" href=\"/webassets/avalon/s/bootstrap3.min.css\" />");
+
                 $("#upload").change(function() {
-                    //TODO: File Name Validation
                     var file = this.files[0];
                     var name = file.name;
                     var ext = name.split('.').pop();
