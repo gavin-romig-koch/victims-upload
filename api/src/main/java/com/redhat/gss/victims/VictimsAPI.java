@@ -14,7 +14,6 @@ public class VictimsAPI extends Application {
     public Set<Class<?>> getClasses() {
         final HashSet<Class<?>> set = new HashSet<Class<?>>();
         set.add(Check.class);
-        set.add(CheckMate.class);
 
         return set;
     }
