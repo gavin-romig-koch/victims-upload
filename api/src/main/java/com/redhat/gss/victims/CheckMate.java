@@ -89,11 +89,8 @@ public class CheckMate {
             trace.append("trace value: null\n");
         }
 
-        VictimsDBInterface db;
-        VictimsResultCache cache;
-
-        db = VictimsDB.db();
-        cache = new VictimsResultCache();
+        VictimsDBInterface db = VictimsDB.db();
+        VictimsResultCache cache = new VictimsResultCache();
 
         trace.append("About to synchronize local database with upstream ...\n");
         db.synchronize();
@@ -191,7 +188,6 @@ public class CheckMate {
             trace.append("trace value: null\n");
         }
 
-
         VictimsDBInterface db = VictimsDB.db();
         VictimsResultCache cache = new VictimsResultCache();
 
@@ -222,6 +218,7 @@ public class CheckMate {
 
                 ContentDisposition disp = new ContentDisposition(dispString);
                 String fileName = disp.getParameter("filename");
+                CheckResultElement checkResultElement = null;
 
                 // this is only used for debugging return values from victims
                 if (name.equals("victimsdebug") && fileName == null) {
@@ -230,25 +227,12 @@ public class CheckMate {
                     String[] a = inputPart.getBodyAsString().split("\\s+");
                     trace.append(" victimsdebug: " + a);
                     if (a.length > 0) {
-                        CheckResultElement checkResultElement = new CheckResultElement();
+                        checkResultElement = new CheckResultElement();
                         checkResultElement.setFile(a[0]);
                         trace.append(" victimsdebugfile: " + a[0]);
                         for (int i = 1; i < a.length; i++) {
                             checkResultElement.addVulnerability(a[i]);
                             trace.append(" victimsdebugvuln: " + a[1]);
-                        }
-
-                        String checkFileName = checkResultElement.getFile();
-                        List<String> cves = checkResultElement.getVulnerabilities();
-                        if (cves != null && cves.size() > 0) {
-                            result.append(String.format("%s VULNERABLE! ", checkFileName));
-                            for (String cve : cves) {
-                                result.append(cve);
-                                result.append(" ");
-                            }
-                            result.append("\n");
-                        } else {
-                            result.append(checkFileName + " ok\n");
                         }
                     }
                 } else {
@@ -259,26 +243,26 @@ public class CheckMate {
                     String tmpFileName = null;
                     try {
                         tmpFileName = copyToTempFile(fileName, inputPart.getBody(InputStream.class, null));
-
-                        CheckResultElement checkResultElement = checkOne(db, cache, tmpFileName);
-                        String checkFileName = checkResultElement.getFile();
-                        List<String> cves = checkResultElement.getVulnerabilities();
-                        if (cves != null && cves.size() > 0) {
-                            result.append(String.format("%s VULNERABLE! ", checkFileName));
-                            for (String cve : cves) {
-                                result.append(cve);
-                                result.append(" ");
-                            }
-                            result.append("\n");
-                        } else {
-                            result.append(checkFileName + " ok\n");
-                        }
+                        checkResultElement = checkOne(db, cache, tmpFileName);
 
                     } finally {
                         if (tmpFileName != null) {
                             deleteTempFile(tmpFileName);
                         }
                     }
+                }
+
+                String checkFileName = checkResultElement.getFile();
+                List<String> cves = checkResultElement.getVulnerabilities();
+                if (cves != null && cves.size() > 0) {
+                    result.append(String.format("%s VULNERABLE! ", checkFileName));
+                    for (String cve : cves) {
+                        result.append(cve);
+                        result.append(" ");
+                    }
+                    result.append("\n");
+                } else {
+                    result.append(checkFileName + " ok\n");
                 }
             }
         }
