@@ -71,7 +71,7 @@ public class CheckMate {
 	@Consumes({ MediaType.MULTIPART_FORM_DATA })
 	@Produces({ MediaType.APPLICATION_XML, MediaType.TEXT_XML, MediaType.APPLICATION_JSON })
     @org.jboss.resteasy.annotations.providers.jaxb.Wrapped(element="checkresult")
-    public List<CheckResultElement> checkMultiJAXB(MultipartFormDataInput inputForm, @Context HttpServletRequest request) throws VictimsException, IOException, ParseException {
+    public List<CheckResultElement> check(MultipartFormDataInput inputForm, @Context HttpServletRequest request) throws VictimsException, IOException, ParseException {
 
         StringBuilder trace = new StringBuilder();
         
@@ -170,9 +170,10 @@ public class CheckMate {
 
     @POST
 	@Consumes({ MediaType.MULTIPART_FORM_DATA })
-    public String checkMultiString(MultipartFormDataInput inputForm, @Context HttpServletRequest request) throws VictimsException, IOException, ParseException  {
+    @Produces({ "*/*", "text/*" })
+    public String checkString(MultipartFormDataInput inputForm, @Context HttpServletRequest request) throws VictimsException, IOException, ParseException  {
 
-        List<CheckResultElement> checkResult = checkMultiJAXB(inputForm, request);
+        List<CheckResultElement> checkResult = check(inputForm, request);
         StringBuilder result = new StringBuilder();
         for (CheckResultElement checkResultElement : checkResult) {
             String checkFileName = checkResultElement.getFile();
