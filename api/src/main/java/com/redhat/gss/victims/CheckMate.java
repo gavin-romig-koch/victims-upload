@@ -70,7 +70,7 @@ public class CheckMate {
     @POST
 	@Consumes({ MediaType.MULTIPART_FORM_DATA })
 	@Produces({ MediaType.APPLICATION_XML, MediaType.TEXT_XML, MediaType.APPLICATION_JSON })
-    @org.jboss.resteasy.annotations.providers.jaxb.Wrapped(element="list", namespace="http://foo.org", prefix="foo")
+    @org.jboss.resteasy.annotations.providers.jaxb.Wrapped(element="checkresult")
     public List<CheckResultElement> checkMultiJAXB(MultipartFormDataInput inputForm, @Context HttpServletRequest request) throws VictimsException, IOException, ParseException {
 
         StringBuilder trace = new StringBuilder();
@@ -305,7 +305,7 @@ public class CheckMate {
         }
 
 
-        @XmlElement
+        @XmlElement(name="vulnerability")
         public List<String> getVulnerabilities() {
             return vulnerabilities;
         }
