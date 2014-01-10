@@ -474,6 +474,7 @@ public class CheckMate {
 
     static public class CheckResultElement {
         private String file;
+        private List<String> vulnerabilities = new ArrayList<String>();
 
         @XmlElement 
         public String getFile() {
@@ -484,7 +485,6 @@ public class CheckMate {
             this.file = file;
         }
 
-        private List<String> vulnerabilities;
 
         @XmlElement 
         public List<String> getVulnerabilities() {
@@ -493,9 +493,6 @@ public class CheckMate {
 
         public void addVulnerability(String vulnerability) {
             if (vulnerability != null && !vulnerability.isEmpty()) {
-                if (this.vulnerabilities == null) {
-                    this.vulnerabilities = new ArrayList<String>();
-                }
                 this.vulnerabilities.add(vulnerability);
             }
         }
@@ -505,12 +502,9 @@ public class CheckMate {
     @XmlRootElement(name = "checkresult")
     static public class CheckResult {
 
-        private List<CheckResultElement> datas;
+        private List<CheckResultElement> datas = new ArrayList<CheckResultElement>();
 
         public void addData(CheckResultElement data) {
-            if (this.datas == null) {
-                this.datas = new ArrayList<CheckResultElement>();
-            }
             this.datas.add(data);
         }
 
@@ -525,7 +519,6 @@ public class CheckMate {
             this.trace = trace;
         }
 
-        @XmlElement
         public String getTrace() {
             return trace;
         }
@@ -536,7 +529,6 @@ public class CheckMate {
             this.error = error;
         }
 
-        @XmlElement
         public String getError() {
             return error;
         }
