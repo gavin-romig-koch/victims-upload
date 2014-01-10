@@ -15,6 +15,7 @@ import javax.ws.rs.core.Context;
 
 import com.redhat.chrometwo.api.security.SecurityInterceptor;
 import javax.mail.internet.ContentDisposition;
+import javax.mail.internet.ParseException;
 
 import java.io.ByteArrayInputStream;
 
@@ -69,7 +70,7 @@ public class CheckMate {
     @POST
 	@Consumes({ MediaType.MULTIPART_FORM_DATA })
 	@Produces({ MediaType.APPLICATION_XML, MediaType.TEXT_XML, MediaType.APPLICATION_JSON })
-    public CheckResult checkMultiJAXB(MultipartFormDataInput inputForm, @Context HttpServletRequest request) throws Exception {
+        public CheckResult checkMultiJAXB(MultipartFormDataInput inputForm, @Context HttpServletRequest request) throws VictimsException, IOException, ParseException {
 
         CheckResult checkResult = new CheckResult();
         StringBuilder trace = new StringBuilder();
@@ -91,35 +92,12 @@ public class CheckMate {
         VictimsDBInterface db;
         VictimsResultCache cache;
 
-        try {
-            db = VictimsDB.db();
-            cache = new VictimsResultCache();
+        db = VictimsDB.db();
+        cache = new VictimsResultCache();
 
-            if (db != null) {
-                throw new VictimsException("testing exception handling: db was not null");
-            }
-
-        } catch (VictimsException e) {
-            throw new VictimsException("VictimsException while opening the database:", e);
-        }
-
-        try {
-            trace.append("About to synchronize local database with upstream ...\n");
-            db.synchronize();
-            trace.append("   successful synchronize.\n");
-
-        } catch (VictimsException e) {
-            StringBuilder error = new StringBuilder();
-            error.append("VictimsException while synchronize-ing local database:\n");
-            e.printStackTrace();
-            error.append(e.toString()).append("\n");
-
-            CheckResult errorResult = new CheckResult();
-            errorResult.setTrace(trace.toString());
-            errorResult.setError(error.toString());
-            return errorResult;
-        }
-
+        trace.append("About to synchronize local database with upstream ...\n");
+        db.synchronize();
+        trace.append("   successful synchronize.\n");
 
         boolean foundAtLeastOne = false;
         Map<String, List<InputPart>> multiValuedMap = inputForm.getFormDataMap();
@@ -169,30 +147,7 @@ public class CheckMate {
                     String tmpFileName = null;
                     try {
                         tmpFileName = copyToTempFile(fileName, inputPart.getBody(InputStream.class, null));
-                        try {
-                            checkResult.addData(checkOne(db, cache, tmpFileName));
-
-                        } catch (VictimsException e) {
-                            StringBuilder error = new StringBuilder();
-                            error.append("VictimsException while checking:\n");
-                            e.printStackTrace();
-                            error.append(e.toString()).append("\n");
-
-                            CheckResult errorResult = new CheckResult();
-                            errorResult.setTrace(trace.toString());
-                            errorResult.setError(error.toString());
-                            return errorResult;
-                        } catch (IOException e) {
-                            StringBuilder error = new StringBuilder();
-                            error.append("VictimsException while checking:\n");
-                            e.printStackTrace();
-                            error.append(e.toString()).append("\n");
-
-                            CheckResult errorResult = new CheckResult();
-                            errorResult.setTrace(trace.toString());
-                            errorResult.setError(error.toString());
-                            return errorResult;
-                        }
+                        checkResult.addData(checkOne(db, cache, tmpFileName));
 
                     } finally {
                         if (tmpFileName != null) {
@@ -217,7 +172,7 @@ public class CheckMate {
 
     @POST
 	@Consumes({ MediaType.MULTIPART_FORM_DATA })
-    public String checkMultiString(MultipartFormDataInput inputForm, @Context HttpServletRequest request) throws Exception {
+    public String checkMultiString(MultipartFormDataInput inputForm, @Context HttpServletRequest request) throws VictimsException, IOException, ParseException  {
 
         StringBuilder result = new StringBuilder();
         StringBuilder trace = new StringBuilder();
@@ -237,30 +192,12 @@ public class CheckMate {
         }
 
 
-        VictimsDBInterface db;
-        VictimsResultCache cache;
+        VictimsDBInterface db = VictimsDB.db();
+        VictimsResultCache cache = new VictimsResultCache();
 
-        try {
-            db = VictimsDB.db();
-            cache = new VictimsResultCache();
-
-        } catch (VictimsException e) {
-            result.append("VictimsException while opening the database:\n");
-            e.printStackTrace();
-            return result.append(e.toString()).append("\n").toString();
-        }
-
-        try {
-            trace.append("About to synchronize local database with upstream ...\n");
-            db.synchronize();
-            trace.append("   successful synchronize.\n");
-
-        } catch (VictimsException e) {
-            result.append("VictimsException while synchronize-ing local database:\n");
-            e.printStackTrace();
-            return result.append(e.toString()).append("\n").toString();
-        }
-
+        trace.append("About to synchronize local database with upstream ...\n");
+        db.synchronize();
+        trace.append("   successful synchronize.\n");
 
         boolean foundAtLeastOne = false;
         Map<String, List<InputPart>> multiValuedMap = inputForm.getFormDataMap();
@@ -323,29 +260,18 @@ public class CheckMate {
                     try {
                         tmpFileName = copyToTempFile(fileName, inputPart.getBody(InputStream.class, null));
 
-                        try {
-                            CheckResultElement checkResultElement = checkOne(db, cache, tmpFileName);
-                            String checkFileName = checkResultElement.getFile();
-                            List<String> cves = checkResultElement.getVulnerabilities();
-                            if (cves != null && cves.size() > 0) {
-                                result.append(String.format("%s VULNERABLE! ", checkFileName));
-                                for (String cve : cves) {
-                                    result.append(cve);
-                                    result.append(" ");
-                                }
-                                result.append("\n");
-                            } else {
-                                result.append(checkFileName + " ok\n");
+                        CheckResultElement checkResultElement = checkOne(db, cache, tmpFileName);
+                        String checkFileName = checkResultElement.getFile();
+                        List<String> cves = checkResultElement.getVulnerabilities();
+                        if (cves != null && cves.size() > 0) {
+                            result.append(String.format("%s VULNERABLE! ", checkFileName));
+                            for (String cve : cves) {
+                                result.append(cve);
+                                result.append(" ");
                             }
-
-                        } catch (VictimsException e) {
-                            result.append("VictimsException while checking:\n");
-                            e.printStackTrace();
-                            return result.append(e.toString()).append("\n").toString();
-                        } catch (IOException e) {
-                            result.append("VictimsException while checking:\n");
-                            e.printStackTrace();
-                            return result.append(e.toString()).append("\n").toString();
+                            result.append("\n");
+                        } else {
+                            result.append(checkFileName + " ok\n");
                         }
 
                     } finally {
@@ -370,7 +296,7 @@ public class CheckMate {
         return result.toString();
     }
 
-    private CheckResultElement checkOne(VictimsDBInterface db, VictimsResultCache cache, String tmpFileName) throws Exception {
+    private CheckResultElement checkOne(VictimsDBInterface db, VictimsResultCache cache, String tmpFileName) throws VictimsException, IOException {
         // tmpFileName is the full (absolute) file name of the temporary copy of the uploaded file
         // it's last path element should be the name of the file that the user attached to it in the uploaded request
  
@@ -433,7 +359,7 @@ public class CheckMate {
         return checkResultElement;
     }
 
-    private String displayHeaders(HttpServletRequest request) throws Exception {
+    private String displayHeaders(HttpServletRequest request) {
         StringBuilder result = new StringBuilder();
         for (java.util.Enumeration<java.lang.String> headerNames = request.getHeaderNames();
              headerNames.hasMoreElements();) {
