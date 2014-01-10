@@ -95,16 +95,12 @@ public class CheckMate {
             db = VictimsDB.db();
             cache = new VictimsResultCache();
 
-        } catch (VictimsException e) {
-            StringBuilder error = new StringBuilder();
-            error.append("VictimsException while opening the database:\n");
-            e.printStackTrace();
-            error.append(e.toString()).append("\n");
+            if (db != null) {
+                throw new VictimsException("testing exception handling: db was not null");
+            }
 
-            CheckResult errorResult = new CheckResult();
-            errorResult.setTrace(trace.toString());
-            errorResult.setError(error.toString());
-            return errorResult;
+        } catch (VictimsException e) {
+            throw new Exception("VictimsException while opening the database:", e);
         }
 
         try {
