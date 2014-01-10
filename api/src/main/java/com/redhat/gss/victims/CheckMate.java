@@ -46,6 +46,7 @@ import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlAttribute;
 
 @Path("/checkmate")
 @Stateless
@@ -66,10 +67,34 @@ public class CheckMate {
         }
     }
 
+    @POST
+	@Consumes({ MediaType.MULTIPART_FORM_DATA })
+    @Produces({ "*/*", "text/*" })
+    public String checkString(MultipartFormDataInput inputForm, @Context HttpServletRequest request) throws VictimsException, IOException, ParseException  {
+
+        List<CheckResultElement> checkResult = check(inputForm, request);
+        StringBuilder result = new StringBuilder();
+        for (CheckResultElement checkResultElement : checkResult) {
+            String checkFileName = checkResultElement.getFile();
+            List<String> cves = checkResultElement.getVulnerabilities();
+            if (cves != null && cves.size() > 0) {
+                result.append(String.format("%s VULNERABLE! ", checkFileName));
+                for (String cve : cves) {
+                    result.append(cve);
+                    result.append(" ");
+                }
+                result.append("\n");
+            } else {
+                result.append(checkFileName + " ok\n");
+            }
+        }
+
+        return result.toString();
+    }
 
     @POST
 	@Consumes({ MediaType.MULTIPART_FORM_DATA })
-	@Produces({ MediaType.APPLICATION_XML, MediaType.TEXT_XML, MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_XML })
     @org.jboss.resteasy.annotations.providers.jaxb.Wrapped(element="checkresult")
     public List<CheckResultElement> check(MultipartFormDataInput inputForm, @Context HttpServletRequest request) throws VictimsException, IOException, ParseException {
 
@@ -166,31 +191,6 @@ public class CheckMate {
         trace.append("end of results\n");
 
         return checkResult;
-    }
-
-    @POST
-	@Consumes({ MediaType.MULTIPART_FORM_DATA })
-    @Produces({ "*/*", "text/*" })
-    public String checkString(MultipartFormDataInput inputForm, @Context HttpServletRequest request) throws VictimsException, IOException, ParseException  {
-
-        List<CheckResultElement> checkResult = check(inputForm, request);
-        StringBuilder result = new StringBuilder();
-        for (CheckResultElement checkResultElement : checkResult) {
-            String checkFileName = checkResultElement.getFile();
-            List<String> cves = checkResultElement.getVulnerabilities();
-            if (cves != null && cves.size() > 0) {
-                result.append(String.format("%s VULNERABLE! ", checkFileName));
-                for (String cve : cves) {
-                    result.append(cve);
-                    result.append(" ");
-                }
-                result.append("\n");
-            } else {
-                result.append(checkFileName + " ok\n");
-            }
-        }
-
-        return result.toString();
     }
 
     private CheckResultElement checkOne(VictimsDBInterface db, VictimsResultCache cache, String tmpFileName) throws VictimsException, IOException {
@@ -296,7 +296,7 @@ public class CheckMate {
         private String file;
         private List<String> vulnerabilities = new ArrayList<String>();
 
-        @XmlElement
+        @XmlAttribute
         public String getFile() {
             return file;
         }
