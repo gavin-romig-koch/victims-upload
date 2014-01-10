@@ -70,9 +70,8 @@ public class CheckMate {
     @POST
 	@Consumes({ MediaType.MULTIPART_FORM_DATA })
 	@Produces({ MediaType.APPLICATION_XML, MediaType.TEXT_XML, MediaType.APPLICATION_JSON })
-        public CheckResult checkMultiJAXB(MultipartFormDataInput inputForm, @Context HttpServletRequest request) throws VictimsException, IOException, ParseException {
+    public CheckResult checkMultiJAXB(MultipartFormDataInput inputForm, @Context HttpServletRequest request) throws VictimsException, IOException, ParseException {
 
-        CheckResult checkResult = new CheckResult();
         StringBuilder trace = new StringBuilder();
         
         trace.append("multi: ");
@@ -96,105 +95,7 @@ public class CheckMate {
         db.synchronize();
         trace.append("   successful synchronize.\n");
 
-        boolean foundAtLeastOne = false;
-        Map<String, List<InputPart>> multiValuedMap = inputForm.getFormDataMap();
-        for (Map.Entry<String, List<InputPart>> entry : multiValuedMap.entrySet()) {
-            foundAtLeastOne = true;
-            String name = entry.getKey();
-            int count = 0;
-            trace.append("found part named: " + name + "\n");
-            for (InputPart inputPart : entry.getValue()) {
-                String dispString = "";
-                count++;
-                trace.append("found value " + count + ":\n");
-                for (Map.Entry<String, List<String>> headerEntry : inputPart.getHeaders().entrySet()) {
-                    for (String headerValue : headerEntry.getValue()) {
-                        trace.append("  header " + headerEntry.getKey() + ": " + headerValue).append("\n");
-                        if (headerEntry.getKey().equals("Content-Disposition")) {
-                            dispString += headerValue;
-                        }
-                    }
-                }
-                trace.append("  mediaType: " + inputPart.getMediaType() + "\n");
-
-                ContentDisposition disp = new ContentDisposition(dispString);
-                String fileName = disp.getParameter("filename");
-
-                // this is only used for debugging return values from victims
-                if (name.equals("victimsdebug") && fileName == null) {
-                    String s = inputPart.getBodyAsString();
-                    trace.append("victimsdebug: " + s);
-                    String[] a = inputPart.getBodyAsString().split("\\s+");
-                    trace.append(" victimsdebug: " + a);
-                    if (a.length > 0) {
-                        CheckResultElement e = new CheckResultElement();
-                        e.setFile(a[0]);
-                        trace.append(" victimsdebugfile: " + a[0]);
-                        for (int i = 1; i < a.length; i++) {
-                            e.addVulnerability(a[i]);
-                            trace.append(" victimsdebugvuln: " + a[1]);
-                        }
-                        checkResult.addData(e);
-                    }
-                } else {
-                    if (fileName == null) {
-                        fileName = name;
-                    }
-
-                    String tmpFileName = null;
-                    try {
-                        tmpFileName = copyToTempFile(fileName, inputPart.getBody(InputStream.class, null));
-                        checkResult.addData(checkOne(db, cache, tmpFileName));
-
-                    } finally {
-                        if (tmpFileName != null) {
-                            deleteTempFile(tmpFileName);
-                        }
-                    }
-                }
-            }
-        }
-
-        if (!foundAtLeastOne) {
-            trace.append("no parts found\n");
-        }
-        trace.append("end of results\n");
-
-        if (foundTraceMarker) {
-            checkResult.setTrace(trace.toString());
-        }
-
-        return checkResult;
-    }
-
-    @POST
-	@Consumes({ MediaType.MULTIPART_FORM_DATA })
-    public String checkMultiString(MultipartFormDataInput inputForm, @Context HttpServletRequest request) throws VictimsException, IOException, ParseException  {
-
-        StringBuilder result = new StringBuilder();
-        StringBuilder trace = new StringBuilder();
-
-        trace.append("multi: ");
-        trace.append(displayHeaders(request));
-
-        boolean foundTraceMarker = false;
-        String[] values = request.getParameterValues("trace");
-        if (values != null) {
-            foundTraceMarker = true;
-            for (String value : values ) {
-                trace.append("trace value: " + value + "\n");
-            }
-        } else {
-            trace.append("trace value: null\n");
-        }
-
-        VictimsDBInterface db = VictimsDB.db();
-        VictimsResultCache cache = new VictimsResultCache();
-
-        trace.append("About to synchronize local database with upstream ...\n");
-        db.synchronize();
-        trace.append("   successful synchronize.\n");
-
+        CheckResult checkResult = new CheckResult();
         boolean foundAtLeastOne = false;
         Map<String, List<InputPart>> multiValuedMap = inputForm.getFormDataMap();
         for (Map.Entry<String, List<InputPart>> entry : multiValuedMap.entrySet()) {
@@ -252,18 +153,128 @@ public class CheckMate {
                     }
                 }
 
-                String checkFileName = checkResultElement.getFile();
-                List<String> cves = checkResultElement.getVulnerabilities();
-                if (cves != null && cves.size() > 0) {
-                    result.append(String.format("%s VULNERABLE! ", checkFileName));
-                    for (String cve : cves) {
-                        result.append(cve);
-                        result.append(" ");
-                    }
-                    result.append("\n");
-                } else {
-                    result.append(checkFileName + " ok\n");
+                if (checkResultElement != null) {
+                    checkResult.addData(checkResultElement);
                 }
+            }
+        }
+
+        if (!foundAtLeastOne) {
+            trace.append("no parts found\n");
+        }
+        trace.append("end of results\n");
+
+        if (foundTraceMarker) {
+            checkResult.setTrace(trace.toString());
+        }
+
+        return checkResult;
+    }
+
+    @POST
+	@Consumes({ MediaType.MULTIPART_FORM_DATA })
+    public String checkMultiString(MultipartFormDataInput inputForm, @Context HttpServletRequest request) throws VictimsException, IOException, ParseException  {
+
+        StringBuilder trace = new StringBuilder();
+
+        trace.append("multi: ");
+        trace.append(displayHeaders(request));
+
+        boolean foundTraceMarker = false;
+        String[] values = request.getParameterValues("trace");
+        if (values != null) {
+            foundTraceMarker = true;
+            for (String value : values ) {
+                trace.append("trace value: " + value + "\n");
+            }
+        } else {
+            trace.append("trace value: null\n");
+        }
+
+        VictimsDBInterface db = VictimsDB.db();
+        VictimsResultCache cache = new VictimsResultCache();
+
+        trace.append("About to synchronize local database with upstream ...\n");
+        db.synchronize();
+        trace.append("   successful synchronize.\n");
+
+        CheckResult checkResult = new CheckResult();
+        boolean foundAtLeastOne = false;
+        Map<String, List<InputPart>> multiValuedMap = inputForm.getFormDataMap();
+        for (Map.Entry<String, List<InputPart>> entry : multiValuedMap.entrySet()) {
+            foundAtLeastOne = true;
+            String name = entry.getKey();
+            int count = 0;
+            trace.append("found part named: " + name + "\n");
+            for (InputPart inputPart : entry.getValue()) {
+                String dispString = "";
+                count++;
+                trace.append("found value " + count + ":\n");
+                for (Map.Entry<String, List<String>> headerEntry : inputPart.getHeaders().entrySet()) {
+                    for (String headerValue : headerEntry.getValue()) {
+                        trace.append("  header " + headerEntry.getKey() + ": " + headerValue).append("\n");
+                        if (headerEntry.getKey().equals("Content-Disposition")) {
+                            dispString += headerValue;
+                        }
+                    }
+                }
+                trace.append("  mediaType: " + inputPart.getMediaType() + "\n");
+
+                ContentDisposition disp = new ContentDisposition(dispString);
+                String fileName = disp.getParameter("filename");
+                CheckResultElement checkResultElement = null;
+
+                // this is only used for debugging return values from victims
+                if (name.equals("victimsdebug") && fileName == null) {
+                    String s = inputPart.getBodyAsString();
+                    trace.append("victimsdebug: " + s);
+                    String[] a = inputPart.getBodyAsString().split("\\s+");
+                    trace.append(" victimsdebug: " + a);
+                    if (a.length > 0) {
+                        checkResultElement = new CheckResultElement();
+                        checkResultElement.setFile(a[0]);
+                        trace.append(" victimsdebugfile: " + a[0]);
+                        for (int i = 1; i < a.length; i++) {
+                            checkResultElement.addVulnerability(a[i]);
+                            trace.append(" victimsdebugvuln: " + a[1]);
+                        }
+                    }
+                } else {
+                    if (fileName == null) {
+                        fileName = name;
+                    }
+
+                    String tmpFileName = null;
+                    try {
+                        tmpFileName = copyToTempFile(fileName, inputPart.getBody(InputStream.class, null));
+                        checkResultElement = checkOne(db, cache, tmpFileName);
+
+                    } finally {
+                        if (tmpFileName != null) {
+                            deleteTempFile(tmpFileName);
+                        }
+                    }
+                }
+
+                if (checkResultElement != null) {
+                    checkResult.addData(checkResultElement);
+                }
+            }
+        }
+
+        StringBuilder result = new StringBuilder();
+        for (CheckResultElement checkResultElement : checkResult.getData()) {
+            String checkFileName = checkResultElement.getFile();
+            List<String> cves = checkResultElement.getVulnerabilities();
+            if (cves != null && cves.size() > 0) {
+                result.append(String.format("%s VULNERABLE! ", checkFileName));
+                for (String cve : cves) {
+                    result.append(cve);
+                    result.append(" ");
+                }
+                result.append("\n");
+            } else {
+                result.append(checkFileName + " ok\n");
             }
         }
 
