@@ -69,7 +69,7 @@ public class CheckMate {
 
     @POST
 	@Consumes({ MediaType.MULTIPART_FORM_DATA })
-    @Produces({ "*/*", "text/*" })
+    @Produces({ MediaType.TEXT_PLAIN, "text/*", "*/*" })
     public String checkString(MultipartFormDataInput inputForm, @Context HttpServletRequest request) throws VictimsException, IOException, ParseException  {
 
         List<CheckResultElement> checkResult = check(inputForm, request);
