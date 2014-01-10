@@ -46,6 +46,7 @@ import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlElement;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
 
 @Path("/checkmate")
 @Stateless
@@ -345,6 +346,7 @@ public class CheckMate {
             this.trace = trace;
         }
 
+        @JsonSerialize(include=JsonSerialize.Inclusion.NON_NULL)
         public String getTrace() {
             return trace;
         }
@@ -355,6 +357,7 @@ public class CheckMate {
             this.error = error;
         }
 
+        @JsonSerialize(include=JsonSerialize.Inclusion.NON_NULL)
         public String getError() {
             return error;
         }
