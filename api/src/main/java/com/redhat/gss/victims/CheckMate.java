@@ -71,7 +71,8 @@ public class CheckMate {
     @POST
 	@Consumes({ MediaType.MULTIPART_FORM_DATA })
 	@Produces({ MediaType.APPLICATION_XML, MediaType.TEXT_XML, MediaType.APPLICATION_JSON })
-    public CheckResult checkMultiJAXB(MultipartFormDataInput inputForm, @Context HttpServletRequest request) throws VictimsException, IOException, ParseException {
+    @org.jboss.resteasy.annotations.providers.jaxb.Wrapped(element="list", namespace="http://foo.org", prefix="foo")
+    public List<CheckResultElement> checkMultiJAXB(MultipartFormDataInput inputForm, @Context HttpServletRequest request) throws VictimsException, IOException, ParseException {
 
         StringBuilder trace = new StringBuilder();
         
@@ -96,7 +97,7 @@ public class CheckMate {
         db.synchronize();
         trace.append("   successful synchronize.\n");
 
-        CheckResult checkResult = new CheckResult();
+        List<CheckResultElement> checkResult = new ArrayList<CheckResultElement>();
         boolean foundAtLeastOne = false;
         Map<String, List<InputPart>> multiValuedMap = inputForm.getFormDataMap();
         for (Map.Entry<String, List<InputPart>> entry : multiValuedMap.entrySet()) {
@@ -155,7 +156,7 @@ public class CheckMate {
                 }
 
                 if (checkResultElement != null) {
-                    checkResult.addData(checkResultElement);
+                    checkResult.add(checkResultElement);
                 }
             }
         }
@@ -165,10 +166,6 @@ public class CheckMate {
         }
         trace.append("end of results\n");
 
-        if (foundTraceMarker) {
-            checkResult.setTrace(trace.toString());
-        }
-
         return checkResult;
     }
 
@@ -176,9 +173,9 @@ public class CheckMate {
 	@Consumes({ MediaType.MULTIPART_FORM_DATA })
     public String checkMultiString(MultipartFormDataInput inputForm, @Context HttpServletRequest request) throws VictimsException, IOException, ParseException  {
 
-        CheckResult checkResult = checkMultiJAXB(inputForm, request);
+        List<CheckResultElement> checkResult = checkMultiJAXB(inputForm, request);
         StringBuilder result = new StringBuilder();
-        for (CheckResultElement checkResultElement : checkResult.getData()) {
+        for (CheckResultElement checkResultElement : checkResult) {
             String checkFileName = checkResultElement.getFile();
             List<String> cves = checkResultElement.getVulnerabilities();
             if (cves != null && cves.size() > 0) {
@@ -191,11 +188,6 @@ public class CheckMate {
             } else {
                 result.append(checkFileName + " ok\n");
             }
-        }
-
-        if (checkResult.getTrace() != null) {
-            result.append("\n\n");
-            result.append(checkResult.getTrace());
         }
 
         return result.toString();
@@ -325,43 +317,6 @@ public class CheckMate {
         }
     }
 
-
-    @XmlRootElement(name = "checkresult")
-    static public class CheckResult {
-
-        private List<CheckResultElement> datas = new ArrayList<CheckResultElement>();
-
-        public void addData(CheckResultElement data) {
-            this.datas.add(data);
-        }
-
-        @XmlElement
-        public List<CheckResultElement> getData() {
-            return datas;
-        }
-
-        private String trace;
-
-        public void setTrace(String trace) {
-            this.trace = trace;
-        }
-
-        @JsonSerialize(include=JsonSerialize.Inclusion.NON_NULL)
-        public String getTrace() {
-            return trace;
-        }
-
-        private String error;
-
-        public void setError(String error) {
-            this.error = error;
-        }
-
-        @JsonSerialize(include=JsonSerialize.Inclusion.NON_NULL)
-        public String getError() {
-            return error;
-        }
-    }
 
     // 
     // Both the cache and the local database want/need to read the whole file seperately, so we must save 
