@@ -100,7 +100,7 @@ public class CheckMate {
             }
 
         } catch (VictimsException e) {
-            throw new Exception("VictimsException while opening the database:", e);
+            throw new VictimsException("VictimsException while opening the database:", e);
         }
 
         try {
