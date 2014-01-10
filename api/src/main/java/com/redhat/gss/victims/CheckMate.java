@@ -302,6 +302,7 @@ public class CheckMate {
         private String file;
         private List<String> vulnerabilities = new ArrayList<String>();
 
+        @XmlElement
         public String getFile() {
             return file;
         }
@@ -311,6 +312,7 @@ public class CheckMate {
         }
 
 
+        @XmlElement
         public List<String> getVulnerabilities() {
             return vulnerabilities;
         }
@@ -332,6 +334,7 @@ public class CheckMate {
             this.datas.add(data);
         }
 
+        @XmlElement
         public List<CheckResultElement> getData() {
             return datas;
         }
