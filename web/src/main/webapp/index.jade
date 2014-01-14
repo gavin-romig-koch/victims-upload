@@ -36,10 +36,10 @@ html(lang="en").chrometwo
                             h4 Vulnerabilities Found
                             hr
                             div.spacer.clearfix
-                            div#results
-                                img#spinner(src="/webassets/avalon/g/chrome/throbber_dickie_large.gif", hidden)
-                                div#fail-msg.alert.alert-danger(hidden)
+                            img#spinner(src="/webassets/avalon/g/chrome/throbber_dickie_large.gif", hidden)
+                            div#fail-msg.alert.alert-danger(hidden)
                                     | Failed to analyze file.
+                            div#results
 
 
         script(type="text/javascript").
@@ -103,6 +103,7 @@ html(lang="en").chrometwo
                                     item = item + "No vulnerabilities detected</li>"
                                 }
                             });
+                            $("#spinner").hide();
                             $("#results").html(item);
                             $("#success-msg").hide();
                         },
