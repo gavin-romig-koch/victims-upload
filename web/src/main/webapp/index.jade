@@ -30,6 +30,7 @@ html(lang="en").chrometwo
                                     div.col-sm-12
                                         button#form-submit.btn.btn-default(type="submit").
                                             Submit
+                            progress(hidden)
 
                         div.col-lg-6
                             h4 Vulnerabilities Found
@@ -40,6 +41,12 @@ html(lang="en").chrometwo
         script(type="text/javascript").
             chrometwo_require([], function() {
                 $("head").prepend("<link rel=\"stylesheet\" type=\"text/css\" media=\"all\" href=\"/webassets/avalon/s/bootstrap3.min.css\" />");
+
+                function progressHandlingFunction(e){
+                    if(e.lengthComputable){
+                        $('progress').attr({value:e.loaded,max:e.total});
+                    }
+                }
 
                 $("#upload").change(function() {
                     var file = this.files[0];
@@ -67,6 +74,7 @@ html(lang="en").chrometwo
                         return false;
                     }
                     $("#upload").prop("name", filename);
+                    $("progress").show();
                     var formData = new FormData($("#upload-form")[0]);
                     $.ajax({
                         url: 'api/check',
@@ -92,6 +100,13 @@ html(lang="en").chrometwo
                         data: formData,
                         cache: false,
                         contentType: false,
+                        xhr: function() {  // Custom XMLHttpRequest
+                            var myXhr = $.ajaxSettings.xhr();
+                            if(myXhr.upload){
+                                myXhr.upload.addEventListener('progress',progressHandlingFunction, false);
+                            }
+                            return myXhr;
+                        },
                         processData: false
                     });
                 });
