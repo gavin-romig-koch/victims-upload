@@ -37,6 +37,7 @@ html(lang="en").chrometwo
                             hr
                             div.spacer.clearfix
                             div#results
+                                img#spinner(src="/webassets/avalon/g/chrome/throbber_dickie_large.gif", hidden)
                                 div#fail-msg.alert.alert-danger(hidden)
                                     | Failed to analyze file.
 
@@ -50,6 +51,7 @@ html(lang="en").chrometwo
                         $('progress').attr({value:e.loaded,max:e.total});
                         if (e.loaded === e.total) {
                             $("#success-msg").show();
+                            $("#spinner").show();
                         }
                     }
                 }
@@ -105,6 +107,7 @@ html(lang="en").chrometwo
                         },
                         error: function (response) {
                             $('#fail-msg').show();
+                            $('#spinner').hide();
                         },
                         data: formData,
                         cache: false,
