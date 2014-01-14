@@ -25,9 +25,9 @@ html(lang="en").chrometwo
                                 div.form-group
                                     label.col-sm-12
                                         | Please select a JAR, POM, or Java Class file to analyze&nbsp;
-                                    div.col-sm-4
+                                    div.col-sm-12
                                         input#upload(type="file")
-                                    div.col-sm-1
+                                    div.col-sm-12
                                         button#form-submit.btn.btn-default(type="submit").
                                             Submit
 
@@ -45,7 +45,7 @@ html(lang="en").chrometwo
                     var file = this.files[0];
                     var name = file.name;
                     var ext = name.split('.').pop();
-                    if (ext !== "class" && ext !== "jar" && ext !== "pom") {
+                    if (ext !== "class" && ext !== "jar" && ext !== "xml") {
                         alert("Invalid file extension");
                         return false;
                     }
@@ -62,7 +62,7 @@ html(lang="en").chrometwo
                         filename = filename.substring(lastIndex + 1);
                     }
                     var ext = filename.split('.').pop();
-                    if (ext !== "class" && ext !== "jar" && ext !== "pom") {
+                    if (ext !== "class" && ext !== "jar" && ext !== "xml") {
                         alert("Invalid file extension");
                         return false;
                     }
@@ -72,7 +72,22 @@ html(lang="en").chrometwo
                         url: 'api/check',
                         type: 'POST',
                         success: function(response) {
-                            $("#results").html(response);
+                            var item = "<ul>"
+                            response.forEach(function(entry) {
+                                item = item + "<li>"
+                                var filename = entry.file;
+                                item = item + filename + ": "
+                                if (entry.vulnerabilities.length > 0) {
+                                    entry.vulnerabilities.forEach(function(ventry) {
+                                        item = item + "<a href='https://access.redhat.com/security/cve/" + ventry + "'>" + ventry + " </a>"
+                                    });
+                                    item = item + "</li>"
+                                }
+                                else {
+                                    item = item + "No vulnerabilities detected</li>"
+                                }
+                            });
+                            $("#results").html(item);
                         },
                         data: formData,
                         cache: false,
