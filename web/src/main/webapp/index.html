@@ -1,10 +1,13 @@
 <!DOCTYPE html><html lang="en" class="chrometwo"><head><script type="text/javascript">window.pstart = new Date().getTime();
-console.log("Start: " + window.pstart);</script><title>Embedded Vulnerability Detection</title><link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet"><!-- The overrides needs to come after the application css--><!-- Need in chrome2.css, look at source of http://handsbox-portal.usersys.redhat.com/pass/chrome_test/--><script data-main="/webassets/avalon/j/chrometwo" src="/webassets/avalon/j/lib/require.js"></script><link href="/webassets/avalon/s/bootstrap3.overrides.css" rel="stylesheet"></head><body class="chrometwo"><div id="chrometwo"><div id="main"><!-- Content area is required as per instruction from Marc Caron, otherwise box styling not honored--><div class="content-area"><div class="row"><div class="col-lg-6"><h4>Embedded Vulnerability Detection</h4><hr><div class="spacer clearfix"></div><form id="upload-form" role="form" enctype="multipart/form-data" class="form-horizontal"><div class="form-group"><label class="col-sm-12">Please select a JAR, POM, or Java Class file to analyze&nbsp;</label><div class="col-sm-12"><input id="upload" type="file"></div><div class="col-sm-12"><button id="form-submit" type="submit" class="btn btn-default">Submit</button></div></div></form><progress hidden></progress></div><div class="col-lg-6"><h4>Vulnerabilities Found</h4><hr><div class="spacer clearfix"></div><div id="results"></div></div></div></div></div></div><script type="text/javascript">chrometwo_require([], function() {
+console.log("Start: " + window.pstart);</script><title>Embedded Vulnerability Detection</title><link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet"><!-- The overrides needs to come after the application css--><!-- Need in chrome2.css, look at source of http://handsbox-portal.usersys.redhat.com/pass/chrome_test/--><script data-main="/webassets/avalon/j/chrometwo" src="/webassets/avalon/j/lib/require.js"></script><link href="/webassets/avalon/s/bootstrap3.overrides.css" rel="stylesheet"></head><body class="chrometwo"><div id="chrometwo"><div id="main"><!-- Content area is required as per instruction from Marc Caron, otherwise box styling not honored--><div class="content-area"><div class="row"><div class="col-lg-6"><h4>Embedded Vulnerability Detection</h4><hr><div class="spacer clearfix"></div><form id="upload-form" role="form" enctype="multipart/form-data"><div class="form-group"><label for="upload">Please select a JAR, POM, or Java Class file to analyze&nbsp;</label><input id="upload" type="file"></div><button id="form-submit" type="submit" class="btn btn-default">Submit</button></form><progress hidden></progress><div id="success-msg" hidden class="alert alert-success">Upload complete. Analyzing file(s) for vulnerabilities.</div></div><div class="col-lg-6"><h4>Vulnerabilities Found</h4><hr><div class="spacer clearfix"></div><div id="results"><div id="fail-msg" hidden class="alert alert-danger">Failed to analyze file.</div></div></div></div></div></div></div><script type="text/javascript">chrometwo_require([], function() {
     $("head").prepend("<link rel=\"stylesheet\" type=\"text/css\" media=\"all\" href=\"/webassets/avalon/s/bootstrap3.min.css\" />");
     
     function progressHandlingFunction(e){
         if(e.lengthComputable){
             $('progress').attr({value:e.loaded,max:e.total});
+            if (e.loaded === e.total) {
+                $("#success-msg").show();
+            }
         }
     }
     
@@ -56,6 +59,9 @@ console.log("Start: " + window.pstart);</script><title>Embedded Vulnerability De
                     }
                 });
                 $("#results").html(item);
+            },
+            error: function (response) {
+                $('#fail-msg').show();
             },
             data: formData,
             cache: false,

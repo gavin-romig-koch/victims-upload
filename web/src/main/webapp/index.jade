@@ -21,22 +21,25 @@ html(lang="en").chrometwo
                             h4 Embedded Vulnerability Detection
                             hr
                             div.spacer.clearfix
-                            form#upload-form.form-horizontal(role="form", enctype="multipart/form-data")
+                            form#upload-form(role="form", enctype="multipart/form-data")
                                 div.form-group
-                                    label.col-sm-12
+                                    label(for="upload")
                                         | Please select a JAR, POM, or Java Class file to analyze&nbsp;
-                                    div.col-sm-12
-                                        input#upload(type="file")
-                                    div.col-sm-12
-                                        button#form-submit.btn.btn-default(type="submit").
+                                    input#upload(type="file")
+                                button#form-submit.btn.btn-default(type="submit").
                                             Submit
                             progress(hidden)
+                            div#success-msg.alert.alert-success(hidden)
+                                | Upload complete. Analyzing file(s) for vulnerabilities.
 
                         div.col-lg-6
                             h4 Vulnerabilities Found
                             hr
                             div.spacer.clearfix
                             div#results
+                                div#fail-msg.alert.alert-danger(hidden)
+                                    | Failed to analyze file.
+
 
         script(type="text/javascript").
             chrometwo_require([], function() {
@@ -45,6 +48,9 @@ html(lang="en").chrometwo
                 function progressHandlingFunction(e){
                     if(e.lengthComputable){
                         $('progress').attr({value:e.loaded,max:e.total});
+                        if (e.loaded === e.total) {
+                            $("#success-msg").show();
+                        }
                     }
                 }
 
@@ -96,6 +102,9 @@ html(lang="en").chrometwo
                                 }
                             });
                             $("#results").html(item);
+                        },
+                        error: function (response) {
+                            $('#fail-msg').show();
                         },
                         data: formData,
                         cache: false,
