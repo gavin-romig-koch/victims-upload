@@ -87,6 +87,9 @@ html(lang="en").chrometwo
                     $.ajax({
                         url: 'api/check',
                         type: 'POST',
+                        headers: {
+                            Accept: "application/json"
+                        },
                         success: function(response) {
                             var item = "<ul>"
                             response.forEach(function(entry) {
