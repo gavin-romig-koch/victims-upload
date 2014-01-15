@@ -2,9 +2,6 @@ doctype html
 
 html(lang="en").chrometwo
     head
-        script(type="text/javascript").
-            window.pstart = new Date().getTime();
-            console.log("Start: " + window.pstart);
         title Embedded Vulnerability Detection
         link(href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css",rel="stylesheet")
         // The overrides needs to come after the application css
@@ -24,7 +21,7 @@ html(lang="en").chrometwo
                             form#upload-form(role="form", enctype="multipart/form-data")
                                 div.form-group
                                     label(for="upload")
-                                        | Please select a JAR, POM, or Java Class file to analyze&nbsp;
+                                        | Please select JAR, POM, or Java Class file(s) for analysis&nbsp;
                                     input#upload(type="file", multiple="multiple")
                                 button#form-submit.btn.btn-default(type="submit").
                                             Submit
@@ -44,6 +41,8 @@ html(lang="en").chrometwo
 
         script(type="text/javascript").
             chrometwo_require([], function() {
+                breadcrumbs = [['Labs', '/labs/'], ['Embedded Vulnerability Detector', '/labs/victims/']];
+
                 $("head").prepend("<link rel=\"stylesheet\" type=\"text/css\" media=\"all\" href=\"/webassets/avalon/s/bootstrap3.min.css\" />");
 
                 function progressHandlingFunction(e){
