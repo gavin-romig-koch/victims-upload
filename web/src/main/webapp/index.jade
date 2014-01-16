@@ -41,7 +41,7 @@ html(lang="en").chrometwo
 
         script(type="text/javascript").
             breadcrumbs = [['Labs', '/labs/'], ['Embedded Vulnerability Detector', '/labs/victims/']];
-            chrometwo_require([], function() {
+            chrometwo_require(["analytics/main"], function(analytics) {
 
                 $("head").prepend("<link rel=\"stylesheet\" type=\"text/css\" media=\"all\" href=\"/webassets/avalon/s/bootstrap3.min.css\" />");
 
@@ -67,6 +67,8 @@ html(lang="en").chrometwo
                 });
                 $('#form-submit').on('click', function (evt) {
                     evt.preventDefault();
+                    analytics.trigger("LabsCompletion");
+
                     var filename = $("#upload").val();
                     if (filename === "") {
                         alert("Please select a file to upload");
