@@ -17,7 +17,7 @@ chrometwo_require(["analytics/main"], function(analytics) {
         for(var i=0; i < this.files.length; i++){
             var name = this.files[i].name;
             var ext = name.split('.').pop();
-            if (ext !== "class" && ext !== "jar" && ext !== "xml") {
+            if (ext !== "class" && ext !== "jar" && ext !== "xml" && ext !== "ear" && ext !== "war") {
                 alert("Invalid file extension");
                 return false;
             }
@@ -37,7 +37,7 @@ chrometwo_require(["analytics/main"], function(analytics) {
             filename = filename.substring(lastIndex + 1);
         }
         var ext = filename.split('.').pop();
-        if (ext !== "class" && ext !== "jar" && ext !== "xml") {
+        if (ext !== "class" && ext !== "jar" && ext !== "xml" && ext !== "ear" && ext !== "war") {
             alert("Invalid file extension");
             return false;
         }
