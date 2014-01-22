@@ -1,17 +1,8 @@
-<!DOCTYPE html><html lang="en" class="chrometwo"><head><title>Embedded Vulnerability Detection</title><link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet"><!-- The overrides needs to come after the application css--><!-- Need in chrome2.css, look at source of http://handsbox-portal.usersys.redhat.com/pass/chrome_test/--><script data-main="/webassets/avalon/j/chrometwo" src="/webassets/avalon/j/lib/require.js"></script><link href="/webassets/avalon/s/bootstrap3.overrides.css" rel="stylesheet"></head><body class="chrometwo"><div id="chrometwo"><div id="main"><!-- Content area is required as per instruction from Marc Caron, otherwise box styling not honored--><div class="content-area"><div class="row"><div class="col-lg-6"><h4>Embedded Vulnerability Detection</h4><hr><div class="spacer clearfix"></div><form id="upload-form" role="form" enctype="multipart/form-data"><div class="form-group"><label for="upload">Please select JAR, EAR, WAR, POM, or Java Class file(s) for analysis&nbsp;</label><input id="upload" type="file" multiple="multiple"></div><button id="form-submit" type="submit" class="btn btn-default">Submit</button></form><progress hidden></progress><div id="success-msg" hidden class="alert alert-success">Upload complete. Analyzing file(s) for vulnerabilities.</div></div><div class="col-lg-6"><h4>Vulnerabilities Found</h4><hr><div class="spacer clearfix"></div><img id="spinner" src="/webassets/avalon/g/chrome/throbber_dickie_large.gif" hidden><div id="fail-msg" hidden class="alert alert-danger">Failed to analyze file.</div><div id="results"></div></div></div></div></div></div><script type="text/javascript">breadcrumbs = [['Labs', '/labs/'], ['Embedded Vulnerability Detector', '/labs/victims/']];
+<!DOCTYPE html><html lang="en" class="chrometwo"><head><title>Embedded Vulnerability Detection</title><link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet"><!-- The overrides needs to come after the application css--><!-- Need in chrome2.css, look at source of http://handsbox-portal.usersys.redhat.com/pass/chrome_test/--><script data-main="/webassets/avalon/j/chrometwo" src="/webassets/avalon/j/lib/require.js"></script><link href="/webassets/avalon/s/bootstrap3.overrides.css" rel="stylesheet"></head><body class="chrometwo"><div id="chrometwo"><div id="main"><!-- Content area is required as per instruction from Marc Caron, otherwise box styling not honored--><div class="content-area"><div class="row"><div class="col-lg-6"><h4>Embedded Vulnerability Detection</h4><hr><div class="spacer clearfix"></div><form id="upload-form" role="form" enctype="multipart/form-data"><div class="form-group"><label for="upload">Please select JAR, EAR, WAR, POM, or Java Class file(s) for analysis&nbsp;</label><input id="upload" type="file" multiple="multiple"><p class="help-block">Uploaded data is immediately deleted after analysis</p></div><button id="form-submit" type="submit" class="btn btn-default">Submit
+</button></form></div><div class="col-lg-6"><h4>Vulnerability Information</h4><hr><div class="spacer clearfix"></div><div id="spinner" hidden><img src="/webassets/avalon/g/chrome/throbber_dickie_large.gif"><div class="alert alert-info"><span aria-hidden="true" class="icon icon-info-circle">Uploading and analyzing file(s) for vulnerabilities.  Please wait.</span></div></div><div id="fail-msg" hidden class="alert alert-danger"><span aria-hidden="true" class="icon icon-warning">Failed to analyze file.</span></div><div id="results"></div></div></div></div></div></div><script type="text/javascript">breadcrumbs = [['Labs', '/labs/'], ['Embedded Vulnerability Detector', '/labs/victims/']];
 chrometwo_require(["analytics/main"], function(analytics) {
 
     $("head").prepend("<link rel=\"stylesheet\" type=\"text/css\" media=\"all\" href=\"/webassets/avalon/s/bootstrap3.min.css\" />");
-    
-    function progressHandlingFunction(e){
-        if(e.lengthComputable){
-            $('progress').attr({value:e.loaded,max:e.total});
-            if (e.loaded === e.total) {
-                $("#success-msg").show();
-                $("#spinner").show();
-            }
-        }
-    }
     
     $("input").change(function() {
         for(var i=0; i < this.files.length; i++){
@@ -42,12 +33,12 @@ chrometwo_require(["analytics/main"], function(analytics) {
             return false;
         }
         $("#upload").prop("name", filename);
-        $("progress").show();
         var uploadForm = $("#upload")[0];
         var formData = new FormData();
         for (var i = 0; i < uploadForm.files.length; i++) {
             formData.append(uploadForm.files[i].name, uploadForm.files[i]);
         }
+        $("#spinner").show();
         $.ajax({
             url: 'api/check',
             type: 'POST',
@@ -81,13 +72,6 @@ chrometwo_require(["analytics/main"], function(analytics) {
             data: formData,
             cache: false,
             contentType: false,
-            xhr: function() {  // Custom XMLHttpRequest
-                var myXhr = $.ajaxSettings.xhr();
-                if(myXhr.upload){
-                    myXhr.upload.addEventListener('progress',progressHandlingFunction, false);
-                }
-                return myXhr;
-            },
             processData: false
         });
     });

@@ -23,18 +23,22 @@ html(lang="en").chrometwo
                                     label(for="upload")
                                         | Please select JAR, EAR, WAR, POM, or Java Class file(s) for analysis&nbsp;
                                     input#upload(type="file", multiple="multiple")
+                                    p.help-block
+                                        | Uploaded data is immediately deleted after analysis
                                 button#form-submit.btn.btn-default(type="submit").
                                             Submit
-                            progress(hidden)
-                            div#success-msg.alert.alert-success(hidden)
-                                | Upload complete. Analyzing file(s) for vulnerabilities.
 
                         div.col-lg-6
-                            h4 Vulnerabilities Found
+                            h4 Vulnerability Information
                             hr
                             div.spacer.clearfix
-                            img#spinner(src="/webassets/avalon/g/chrome/throbber_dickie_large.gif", hidden)
+                            div#spinner(hidden)
+                                img(src="/webassets/avalon/g/chrome/throbber_dickie_large.gif")
+                                div.alert.alert-info
+                                    span.icon.icon-info-circle(aria-hidden='true')
+                                        | Uploading and analyzing file(s) for vulnerabilities.  Please wait.
                             div#fail-msg.alert.alert-danger(hidden)
+                                span.icon.icon-warning(aria-hidden='true')
                                     | Failed to analyze file.
                             div#results
 
@@ -44,16 +48,6 @@ html(lang="en").chrometwo
             chrometwo_require(["analytics/main"], function(analytics) {
 
                 $("head").prepend("<link rel=\"stylesheet\" type=\"text/css\" media=\"all\" href=\"/webassets/avalon/s/bootstrap3.min.css\" />");
-
-                function progressHandlingFunction(e){
-                    if(e.lengthComputable){
-                        $('progress').attr({value:e.loaded,max:e.total});
-                        if (e.loaded === e.total) {
-                            $("#success-msg").show();
-                            $("#spinner").show();
-                        }
-                    }
-                }
 
                 $("input").change(function() {
                     for(var i=0; i < this.files.length; i++){
@@ -84,12 +78,12 @@ html(lang="en").chrometwo
                         return false;
                     }
                     $("#upload").prop("name", filename);
-                    $("progress").show();
                     var uploadForm = $("#upload")[0];
                     var formData = new FormData();
                     for (var i = 0; i < uploadForm.files.length; i++) {
                         formData.append(uploadForm.files[i].name, uploadForm.files[i]);
                     }
+                    $("#spinner").show();
                     $.ajax({
                         url: 'api/check',
                         type: 'POST',
@@ -123,13 +117,6 @@ html(lang="en").chrometwo
                         data: formData,
                         cache: false,
                         contentType: false,
-                        xhr: function() {  // Custom XMLHttpRequest
-                            var myXhr = $.ajaxSettings.xhr();
-                            if(myXhr.upload){
-                                myXhr.upload.addEventListener('progress',progressHandlingFunction, false);
-                            }
-                            return myXhr;
-                        },
                         processData: false
                     });
                 });
