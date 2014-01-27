@@ -20,15 +20,19 @@ html(lang="en").chrometwo
                             hr
                             br
                             div.spacer.clearfix
-                            form#upload-form(role="form", enctype="multipart/form-data")
+                                | <b>Please select JAR, POM, or Java Class file(s) for analysis<br/><br/></b>
+                            form.form-horizontal#upload-form(role="form", enctype="multipart/form-data")
                                 div.form-group
-                                    label(for="upload")
-                                        | Please select JAR, EAR, WAR, POM, or Java Class file(s) for analysis&nbsp;&nbsp;
-                                    input#upload(type="file", multiple="multiple")
-                                    p.help-block
-                                        | Uploaded data is immediately deleted after analysis
-                                button#form-submit.btn.btn-default(type="submit").
+                                    label.col-sm-2(for="upload")
+                                        | Attachment
+                                    div.col-sm-10
+                                        input#upload(type="file", multiple="multiple")
+                                div.form-group
+                                    div.col-sm-12
+                                        button#form-submit.btn.btn-default(type="submit").
                                             Submit
+                            div.p.help-block
+                                | Uploaded data is immediately deleted after analysis
 
                         div.col-md-6
                             h2 Vulnerability Information
