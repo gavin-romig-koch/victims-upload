@@ -11,24 +11,26 @@ html(lang="en").chrometwo
     body.chrometwo
         div#chrometwo
             div#main
+                h1 Embedded Vulnerability Detection
                 // Content area is required as per instruction from Marc Caron, otherwise box styling not honored
                 div.content-area
                     div.row
-                        div.col-lg-6
-                            h4 Embedded Vulnerability Detection
+                        div.col-md-6
+                            h4 Upload
                             hr
+                            br
                             div.spacer.clearfix
                             form#upload-form(role="form", enctype="multipart/form-data")
                                 div.form-group
                                     label(for="upload")
-                                        | Please select JAR, EAR, WAR, POM, or Java Class file(s) for analysis&nbsp;
+                                        | Please select JAR, EAR, WAR, POM, or Java Class file(s) for analysis&nbsp;&nbsp;
                                     input#upload(type="file", multiple="multiple")
                                     p.help-block
                                         | Uploaded data is immediately deleted after analysis
                                 button#form-submit.btn.btn-default(type="submit").
                                             Submit
 
-                        div.col-lg-6
+                        div.col-md-6
                             h4 Vulnerability Information
                             hr
                             div.spacer.clearfix
