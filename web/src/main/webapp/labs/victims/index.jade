@@ -49,6 +49,30 @@ html(lang="en").chrometwo
 
                 $("head").prepend("<link rel=\"stylesheet\" type=\"text/css\" media=\"all\" href=\"/webassets/avalon/s/bootstrap3.min.css\" />");
 
+                var tagBody = '(?:[^"\'>]|"[^"]*"|\'[^\']*\')*';
+
+                var tagOrComment = new RegExp(
+                    '<(?:'
+                    // Comment body.
+                    + '!--(?:(?:-*[^->])*--+|-?)'
+                    // Special "raw text" elements whose content should be elided.
+                    + '|script\\b' + tagBody + '>[\\s\\S]*?</script\\s*'
+                    + '|style\\b' + tagBody + '>[\\s\\S]*?</style\\s*'
+                    // Regular name
+                    + '|/?[a-z]'
+                    + tagBody
+                    + ')>',
+                    'gi');
+
+                function removeTags(html) {
+                  var oldHtml;
+                  do {
+                    oldHtml = html;
+                    html = html.replace(tagOrComment, '');
+                  } while (html !== oldHtml);
+                  return html.replace(/</g, '&lt;');
+                }
+
                 $("input").change(function() {
                     for(var i=0; i < this.files.length; i++){
                         var name = this.files[i].name;
@@ -94,7 +118,7 @@ html(lang="en").chrometwo
                             var item = "<ul>"
                             response.forEach(function(entry) {
                                 item = item + "<li>"
-                                var filename = entry.file;
+                                var filename = removeTags(entry.file);
                                 item = item + filename + ": "
                                 if (entry.vulnerabilities.length > 0) {
                                     entry.vulnerabilities.forEach(function(ventry) {
