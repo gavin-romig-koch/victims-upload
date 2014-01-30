@@ -16,11 +16,13 @@ html(lang="en").chrometwo
                 div.content-area
                     div.row
                         div.col-md-12
-                            p
-                                | The Embedded Vulnerability Detection application provides the functionality to scan Java
-                                | projects and dependencies against a database of publicly known vulnerabilities.
-                                | This database is maintained by Red Hat security teams.  Upload your source code, POM,
-                                | or jar files to get started!<br/><br/>
+                            div.spacer.clearfix
+                            div.panel.panel-default
+                                div.panel-body
+                                    | The Embedded Vulnerability Detection application provides the functionality to scan Java
+                                    | projects and dependencies against a database of publicly known vulnerabilities.
+                                    | This database is maintained by Red Hat security teams.  Upload your source code, POM,
+                                    | or jar files to get started!
                     div.row
                         div.col-md-6
                             h2 Upload
@@ -128,9 +130,9 @@ html(lang="en").chrometwo
                             Accept: "application/json"
                         },
                         success: function(response) {
-                            var item = "<ul>"
+                            var item = "<ul class='list-group'>"
                             response.forEach(function(entry) {
-                                item = item + "<li>"
+                                item = item + "<li class='list-group-item'>"
                                 var filename = removeTags(entry.file);
                                 item = item + filename + ": "
                                 if (entry.vulnerabilities.length > 0) {
