@@ -8,6 +8,7 @@ html(lang="en").chrometwo
         // Need in chrome2.css, look at source of http://handsbox-portal.usersys.redhat.com/pass/chrome_test/
         script(data-main="/webassets/avalon/j/chrometwo",src="/webassets/avalon/j/lib/require.js")
         link(href="/webassets/avalon/s/bootstrap3.overrides.css", rel="stylesheet")
+        link(href="/labs/victims/victims.css", rel="stylesheet")
     body.chrometwo
         div#chrometwo
             div#main
@@ -17,45 +18,37 @@ html(lang="en").chrometwo
                     div.row
                         div.col-md-12
                             div.spacer.clearfix
-                            div.panel.panel-default
-                                div.panel-body
-                                    | The Embedded Vulnerability Detection application provides the functionality to scan Java
-                                    | projects and dependencies against a database of publicly known vulnerabilities.
-                                    | This database is maintained by Red Hat security teams.  Upload your source code, POM,
-                                    | or jar files to get started!
-                    div.row
+                            p
+                                | The Embedded Vulnerability Detection application provides the functionality to scan Java
+                                | projects and dependencies against a database of publicly known vulnerabilities.
+                                | This database is maintained by Red Hat security teams.  Upload your source code, POM,
+                                | or jar files to get started!
+                    div.row.app-ui
                         div.col-md-6
-                            h2 Upload
-                            hr
-                            br
-                            div.spacer.clearfix
-                                | <b>Please select JAR, POM, or Java Class file(s) for analysis<br/><br/></b>
-                            form.form-horizontal#upload-form(role="form", enctype="multipart/form-data")
+                            h2.bordered 1. Upload
+                            form.form#upload-form(role="form", enctype="multipart/form-data")
                                 div.form-group
-                                    label.col-sm-2(for="upload")
-                                        | Attachment
-                                    div.col-sm-10
-                                        input#upload(type="file", multiple="multiple")
+                                    label(for="upload")
+                                        | Please select JAR, POM, or Java Class file(s) for analysis
+                                    input#upload(type="file", multiple="multiple")
                                 div.form-group
-                                    div.col-sm-12
-                                        button#form-submit.btn.btn-default(type="submit").
+                                    button#form-submit.btn.btn-primary(type="submit").
                                             Submit
                             div.p.help-block
                                 | Uploaded data is immediately deleted after analysis
 
                         div.col-md-6
-                            h2 Vulnerability Information
-                            hr
-                            div.spacer.clearfix
+                            h2.bordered 2. Vulnerability Information
+                            div.alert.alert-warning#no-results
+                                | No results. Please select a file to view vulnerability information
                             div#spinner(hidden)
-                                img(src="/webassets/avalon/g/chrome/throbber_dickie_large.gif")
                                 div.alert.alert-info
-                                    span.icon.icon-info-circle(aria-hidden='true')
-                                        | Uploading and analyzing file(s) for vulnerabilities.  Please wait.
+                                    //span.icon.icon-info-circle(aria-hidden='true')
+                                    img(src="/webassets/avalon/g/chrome/throbber_dickie.gif")
+                                    | &nbsp;&nbsp;Uploading and analyzing file(s) for vulnerabilities.  Please wait.
                             div#fail-msg.alert.alert-danger(hidden)
                                 span.icon.icon-warning(aria-hidden='true')
                                     | Failed to analyze file.
-                            | <br/>
                             div#results
 
 
@@ -102,6 +95,8 @@ html(lang="en").chrometwo
                 $('#form-submit').on('click', function (evt) {
                     evt.preventDefault();
                     analytics.trigger("LabsCompletion");
+                    $("#no-results").hide();
+                    $("#vuln-list").remove();
 
                     var filename = $("#upload").val();
                     if (filename === "") {
@@ -131,19 +126,19 @@ html(lang="en").chrometwo
                             Accept: "application/json"
                         },
                         success: function(response) {
-                            var item = "<ul class='list-group'>"
+                            var item = "<ul id='vuln-list' class='list-group'>";
                             response.forEach(function(entry) {
-                                item = item + "<li class='list-group-item'>"
                                 var filename = removeTags(entry.file);
-                                item = item + filename + ": "
                                 if (entry.vulnerabilities.length > 0) {
+                                    item = item + "<li class='list-group-item list-group-item-danger'>";
+                                    item = item + "<span class=\"icon-warning\" aria-hidden=\"true\"></span> " + filename + ": ";
                                     entry.vulnerabilities.forEach(function(ventry) {
                                         item = item + "<a href='https://access.redhat.com/security/cve/" + ventry + "'>" + ventry + " </a>"
                                     });
                                     item = item + "</li>"
                                 }
                                 else {
-                                    item = item + "No vulnerabilities detected</li>"
+                                    item =  item + "<li class='list-group-item list-group-item-success'><span class='icon-ok' aria-hidden='true'></span> " + filename + ": No vulnerabilities detected</li>"
                                 }
                             });
                             $("#spinner").hide();
