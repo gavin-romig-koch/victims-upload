@@ -55,9 +55,10 @@ html(lang="en").chrometwo
 
         script(type="text/javascript").
             breadcrumbs = [['Labs', '/labs/'], ['Embedded Vulnerability Detector', '/labs/victims/']];
-            $("head").prepend("<link rel=\"stylesheet\" type=\"text/css\" media=\"all\" href=\"/webassets/avalon/s/bootstrap3.min.css\" />");
 
-            chrometwo_require([], function(analytics) {
+            chrometwo_require(['jquery'], function($) {
+
+                $("head").prepend("<link rel=\"stylesheet\" type=\"text/css\" media=\"all\" href=\"/webassets/avalon/s/bootstrap3.min.css\" />");
 
                 var tagBody = '(?:[^"\'>]|"[^"]*"|\'[^\']*\')*';
 

@@ -2,10 +2,11 @@
 projects and dependencies against a database of publicly known vulnerabilities.
 This database is maintained by Red Hat security teams.  Upload your source code, POM,
 or jar files to get started!</p></div></div><div class="row app-ui"><div class="col-md-6"><h2 class="bordered">1. Upload</h2><form id="upload-form" role="form" enctype="multipart/form-data" class="form"><div class="form-group"><label for="upload">Please select JAR, POM, or Java Class file(s) for analysis</label><input id="upload" type="file" multiple="multiple"></div><div class="form-group"><button id="form-submit" type="submit" class="btn btn-primary">Submit</button></div></form><div class="p help-block">Uploaded data is immediately deleted after analysis</div></div><div class="col-md-6"><h2 class="bordered">2. Vulnerability Information</h2><div id="no-results" class="alert alert-warning">No results. Please select a file to view vulnerability information</div><div id="spinner" hidden><div class="alert alert-info"><!--span.icon.icon-info-circle(aria-hidden='true')--><img src="/webassets/avalon/g/chrome/throbber_dickie.gif">&nbsp;&nbsp;Uploading and analyzing file(s) for vulnerabilities.  Please wait.</div></div><div id="fail-msg" hidden class="alert alert-danger"><span aria-hidden="true" class="icon icon-warning">Failed to analyze file.</span></div><div id="results"></div></div></div></div></div></div><script type="text/javascript">breadcrumbs = [['Labs', '/labs/'], ['Embedded Vulnerability Detector', '/labs/victims/']];
-$("head").prepend("<link rel=\"stylesheet\" type=\"text/css\" media=\"all\" href=\"/webassets/avalon/s/bootstrap3.min.css\" />");
 
-chrometwo_require([], function(analytics) {
+chrometwo_require(['jquery'], function($) {
 
+    $("head").prepend("<link rel=\"stylesheet\" type=\"text/css\" media=\"all\" href=\"/webassets/avalon/s/bootstrap3.min.css\" />");
+    
     var tagBody = '(?:[^"\'>]|"[^"]*"|\'[^\']*\')*';
     
     var tagOrComment = new RegExp(
