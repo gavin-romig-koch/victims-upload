@@ -3,10 +3,11 @@ doctype html
 html(lang="en").chrometwo
     head
         title Embedded Vulnerability Detection
+        link(href="/chrome_themes/umbra/s/chrometwo.css",rel="stylesheet")
+        script(src="/webassets/avalon/j/lib/require.js")
         link(href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css",rel="stylesheet")
         // The overrides needs to come after the application css
         // Need in chrome2.css, look at source of http://handsbox-portal.usersys.redhat.com/pass/chrome_test/
-        script(data-main="/webassets/avalon/j/chrometwo",src="/webassets/avalon/j/lib/require.js")
         link(href="/webassets/avalon/s/bootstrap3.overrides.css", rel="stylesheet")
         link(href="/labs/jevd/victims.css", rel="stylesheet")
     body.chrometwo
@@ -54,9 +55,9 @@ html(lang="en").chrometwo
 
         script(type="text/javascript").
             breadcrumbs = [['Labs', '/labs/'], ['Embedded Vulnerability Detector', '/labs/victims/']];
-            chrometwo_require(["analytics/main"], function(analytics) {
+            $("head").prepend("<link rel=\"stylesheet\" type=\"text/css\" media=\"all\" href=\"/webassets/avalon/s/bootstrap3.min.css\" />");
 
-                $("head").prepend("<link rel=\"stylesheet\" type=\"text/css\" media=\"all\" href=\"/webassets/avalon/s/bootstrap3.min.css\" />");
+            chrometwo_require([], function(analytics) {
 
                 var tagBody = '(?:[^"\'>]|"[^"]*"|\'[^\']*\')*';
 
@@ -94,7 +95,9 @@ html(lang="en").chrometwo
                 });
                 $('#form-submit').on('click', function (evt) {
                     evt.preventDefault();
-                    analytics.trigger("LabsCompletion");
+                    chrometwo_require(["analytics/main"], function(analytics) {
+                      analytics.trigger("LabsCompletion");
+                    });
                     $("#no-results").hide();
                     $("#vuln-list").remove();
 
