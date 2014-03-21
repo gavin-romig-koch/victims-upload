@@ -22,15 +22,15 @@ html(lang="en").chrometwo
                             p
                                 | The Embedded Vulnerability Detection application provides the functionality to scan Java
                                 | projects and dependencies against a database of publicly known vulnerabilities.
-                                | This database is maintained by Red Hat security teams.  Upload your source code, POM,
-                                | or jar files to get started!
+                                | This database is maintained by Red Hat security teams.  Upload your Java Class
+                                | or JAR files to get started!
                     div.row.app-ui
                         div.col-md-6
                             h2.bordered 1. Upload
                             form.form#upload-form(role="form", enctype="multipart/form-data")
                                 div.form-group
                                     label(for="upload")
-                                        | Please select JAR, POM, or Java Class file(s) for analysis
+                                        | Please select Java Class or JAR file(s) for analysis
                                     input#upload(type="file", multiple="multiple")
                                 div.form-group
                                     button#form-submit.btn.btn-primary(type="submit").
@@ -88,7 +88,7 @@ html(lang="en").chrometwo
                     for(var i=0; i < this.files.length; i++){
                         var name = this.files[i].name;
                         var ext = name.split('.').pop();
-                        if (ext !== "class" && ext !== "jar" && ext !== "xml" && ext !== "ear" && ext !== "war") {
+                        if (ext !== "class" && ext !== "jar") {
                             alert("Invalid file extension");
                             return false;
                         }
@@ -112,7 +112,7 @@ html(lang="en").chrometwo
                         filename = filename.substring(lastIndex + 1);
                     }
                     var ext = filename.split('.').pop();
-                    if (ext !== "class" && ext !== "jar" && ext !== "xml" && ext !== "ear" && ext !== "war") {
+                    if (ext !== "class" && ext !== "jar") {
                         alert("Invalid file extension");
                         return false;
                     }
