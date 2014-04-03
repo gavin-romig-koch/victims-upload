@@ -1,0 +1,38 @@
+This is the deployment directory for an OpenShift app.
+
+
+This webapp provides a web frontend to the http://victi.ms application.  This webapp allows one to upload files for checking against the http://victi.ms database.  It does this simply by putting a webapp wrapper around the client functionality provided by http://victi.ms. 
+
+So far this just consists of a tiny http api which allows one to upload one or more files in a mime multipart form-data post.   The api syncronizes it's own local copy of the victims db with the upstream one at 'victi.ms', and looks at the uploaded files to see if any have any CVE's listed in that db.   The api only handles, and db only contain, info for 'jar' files and 'class' files.   The api only looks at the name of the file (the part after the last dot) to tell what kind of file it is, so post the files with proper dot endings (".jar" for jar files; ".class" for class files).
+
+Once you've installed the app somewhere, you can try it out.
+
+You can browse to the URL where the app in installed, and it will present you with a web form asking for one or more files to check.  Choose some files, and click submit.  It will upload the files to the server, check them for vulnerablities, and return the results to the web page.   The app does not keep the files after they have been checked.
+
+You can also check files directly with the built in API, from your own application, or from the command line.  The URL of the API is relative to the URL where the server is installed:
+
+    <API-URL> = <SERVER-URL>/api/check
+
+    curl -F "file=@/path/to/file/name-of-file.jar" -F "file=@/path/to/file/name-of-file.class" -H "Accept:text/plain" <API-URL>
+
+You must include at lest one -F, but you can include as many -F as you like.  Add "-D -" to the end of this command if it looks like it's not doing anything.
+
+If you leave off the Accept header, it will return JSON.  You can also specify "text/xml" if you like that.
+
+
+For example:
+
+$ curl -H "Accept:text/plain" -F file=@.m2/repository/classworlds/classworlds/1.1/classworlds-1.1.jar -F file=@.m2/repository/commons-beanutils/commons-beanutils/1.7.0/commons-beanutils-1.7.0.jar -F file=@.m2/repository/org/jboss/client/jbossall-client/5.0.0.Beta4/jbossall-client-5.0.0.Beta4.jar https://access.redhat.com/labs/jevd/api/check 
+classworlds-1.1.jar ok
+commons-beanutils-1.7.0.jar ok
+jbossall-client-5.0.0.Beta4.jar VULNERABLE! CVE-2009-0217 
+
+
+
+
+
+
+
+This app is based on the the OpenShift `jbosseap` cartridge documentation can be found at:
+
+https://github.com/openshift/origin-server/tree/master/cartridges/openshift-origin-cartridge-jbosseap/README.md
