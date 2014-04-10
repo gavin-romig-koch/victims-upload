@@ -52,6 +52,31 @@ html(lang="en").chrometwo
                                     | Failed to analyze file.
                             div#results
 
+                        div.col-md-6
+                            h2.bordered 3. Alternatively 
+                            p
+                                | If you can not, or would prefer not to, upload files to this application, you 
+                                | can download this standalone executable Java JAR file that is a command line 
+                                | version of JEVD:
+
+                            a(href="./jevd-client-0.9.jar") jevd-client-0.9.jar
+
+                            p
+                                | Run this JAR file like this:
+ 
+                            pre 
+                                | $ java -jar jevd-client.jar --verbose --update --recursive file1.jar file2.class directory/
+
+                            p where
+                            dl
+                                dt "jevd-client.jar" 
+                                dd is the downloaded jar file.
+                                dt "file1.jar" 
+                                dd is a jar file to be analyzed
+                                dt "file2.class" 
+                                dd is a class file to be analyzed
+                                dt "directory/"
+                                dd is a directory, the contents of which are recursively searched for jar and class files to be analyzed 
 
         script(type="text/javascript").
             breadcrumbs = [['Labs', '/labs/'], ['Embedded Vulnerability Detector', '/labs/victims/']];
