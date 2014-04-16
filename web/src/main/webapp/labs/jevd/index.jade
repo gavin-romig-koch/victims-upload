@@ -38,7 +38,7 @@ html(lang="en").chrometwo
                             div.p.help-block
                                 | Uploaded data is immediately deleted after analysis
 
-                        div.col-md-6
+                        div.col-md-6#results-section(hidden)
                             h2.bordered Vulnerability Information
                             div.alert.alert-warning#no-results
                                 | No results. Please select a file to view vulnerability information
@@ -52,8 +52,7 @@ html(lang="en").chrometwo
                                     | Failed to analyze file.
                             div#results
 
-                    div.row.app-ui
-                        div.col-md-6
+                        div.col-md-6#download-section
                             h2.bordered Alternatively 
                             p
                                 | If you can not, or would prefer not to, upload files to this application, you 
@@ -125,6 +124,8 @@ html(lang="en").chrometwo
                     chrometwo_require(["analytics/main"], function(analytics) {
                       analytics.trigger("LabsCompletion");
                     });
+                    $("#download-section").hide();
+                    $("#results-section").show();
                     $("#no-results").hide();
                     $("#vuln-list").remove();
 
