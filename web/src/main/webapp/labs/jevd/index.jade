@@ -60,12 +60,13 @@ html(lang="en").chrometwo
                                 | can download this standalone executable Java JAR file that is a command line 
                                 | version of JEVD:
 
-                            a(style="margin:2em",href="./jevd-client-0.9.jar") jevd-client-0.9.jar
+                            a(href="./jevd-client-0.9.jar") jevd-client-0.9.jar
 
-                            div.p
+                            div.p.help-block
                                 | Run this JAR file like this:
 
-                                pre(style="margin-left:1em auto 1em 2em") $ java -jar jevd-client.jar --verbose --update --recursive file1.jar file2.class directory/
+                                pre(style="margin-left:2em").
+                                    $ java -jar jevd-client.jar --verbose --update --recursive file1.jar file2.class directory/
 
                                 | where
 
@@ -77,7 +78,7 @@ html(lang="en").chrometwo
                                     dt "file2.class" 
                                     dd is a class file to be analyzed
                                     dt "directory/"
-                                    dd is searched recursivly for jar & class files
+                                    dd is searched recursivly for 
 
         script(type="text/javascript").
             breadcrumbs = [['Labs', '/labs/'], ['Embedded Vulnerability Detector', '/labs/victims/']];
