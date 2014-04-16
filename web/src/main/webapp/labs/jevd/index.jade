@@ -22,11 +22,12 @@ html(lang="en").chrometwo
                             p
                                 | The Embedded Vulnerability Detector application provides the functionality to scan Java
                                 | projects and dependencies against a database of publicly known vulnerabilities.
-                                | This database is maintained by Red Hat security teams.  Upload your Java Class
-                                | or JAR files to get started!
+                                | This database is maintained by Red Hat security teams.
                     div.row.app-ui
                         div.col-md-6
                             h2.bordered Upload
+                            div.p.help-block
+                                | Upload your Java Class or JAR files to get started!
                             form.form#upload-form(role="form", enctype="multipart/form-data")
                                 div.form-group
                                     label(for="upload")
@@ -54,29 +55,28 @@ html(lang="en").chrometwo
 
                         div.col-md-6#download-section
                             h2.bordered Alternatively 
-                            p
+                            div.p.help-block
                                 | If you can not, or would prefer not to, upload files to this application, you 
                                 | can download this standalone executable Java JAR file that is a command line 
                                 | version of JEVD:
 
                             a(href="./jevd-client-0.9.jar") jevd-client-0.9.jar
 
-                            p
+                            div.p.help-block
                                 | Run this JAR file like this:
  
-                            pre 
-                                | $ java -jar jevd-client.jar --verbose --update --recursive file1.jar file2.class directory/
+                                pre $ java -jar jevd-client.jar --verbose --update --recursive file1.jar file2.class directory/
 
-                            p where
-                            dl(class="dl-horizontal")
-                                dt "jevd-client.jar" 
-                                dd is the downloaded jar file.
-                                dt "file1.jar" 
-                                dd is a jar file to be analyzed
-                                dt "file2.class" 
-                                dd is a class file to be analyzed
-                                dt "directory/"
-                                dd is a directory recursivly searched for jar and class files
+
+                                dl(class="dl-horizontal")
+                                    dt "jevd-client.jar" 
+                                    dd is the downloaded jar file.
+                                    dt "file1.jar" 
+                                    dd is a jar file to be analyzed
+                                    dt "file2.class" 
+                                    dd is a class file to be analyzed
+                                    dt "directory/"
+                                    dd is a directory recursivly searched for jar and class files
 
         script(type="text/javascript").
             breadcrumbs = [['Labs', '/labs/'], ['Embedded Vulnerability Detector', '/labs/victims/']];
