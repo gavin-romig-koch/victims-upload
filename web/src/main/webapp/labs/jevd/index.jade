@@ -60,25 +60,27 @@ html(lang="en").chrometwo
                                 | can download this standalone executable Java JAR file that is a command line 
                                 | version of JEVD:
 
-                            a(href="./jevd-client-0.9.jar") jevd-client-0.9.jar
+                            p
+                                a(href="./jevd-client-0.9.jar") jevd-client-0.9.jar
 
-                            div.p
-                                | Run this JAR file like this:
+                                p
+                                    | Run this JAR file like this:
 
-                                pre(style="margin-left:2em").
-                                    $ java -jar jevd-client.jar --verbose --update --recursive file1.jar file2.class directory/
+                                    p
+                                        pre(style="margin-left:2em").
+                                            $ java -jar jevd-client.jar --verbose --update --recursive file1.jar file2.class directory/
 
-                                | where
+                                        | where
 
-                                dl(class="dl-horizontal")
-                                    dt "jevd-client.jar" 
-                                    dd is the downloaded jar file.
-                                    dt "file1.jar" 
-                                    dd is a jar file to be analyzed
-                                    dt "file2.class" 
-                                    dd is a class file to be analyzed
-                                    dt "directory/"
-                                    dd is searched recursivly for 
+                                        dl(class="dl-horizontal")
+                                            dt "jevd-client.jar" 
+                                            dd is the downloaded jar file.
+                                            dt "file1.jar" 
+                                            dd is a jar file to be analyzed
+                                            dt "file2.class" 
+                                            dd is a class file to be analyzed
+                                            dt "directory/"
+                                            dd is searched recursively for jar and class files to be analyzed
 
         script(type="text/javascript").
             breadcrumbs = [['Labs', '/labs/'], ['Embedded Vulnerability Detector', '/labs/victims/']];
