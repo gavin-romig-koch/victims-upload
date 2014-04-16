@@ -64,19 +64,21 @@ html(lang="en").chrometwo
 
                             div.p.help-block
                                 | Run this JAR file like this:
- 
-                                pre $ java -jar jevd-client.jar --verbose --update --recursive file1.jar file2.class directory/
 
+                                div.p pre $ java -jar jevd-client.jar --verbose --update --recursive file1.jar file2.class directory/
 
-                                dl(class="dl-horizontal")
-                                    dt "jevd-client.jar" 
-                                    dd is the downloaded jar file.
-                                    dt "file1.jar" 
-                                    dd is a jar file to be analyzed
-                                    dt "file2.class" 
-                                    dd is a class file to be analyzed
-                                    dt "directory/"
-                                    dd is a directory recursivly searched for jar and class files
+                                | where
+
+                                div 
+                                    dl(class="dl-horizontal")
+                                        dt "jevd-client.jar" 
+                                        dd is the downloaded jar file.
+                                        dt "file1.jar" 
+                                        dd is a jar file to be analyzed
+                                        dt "file2.class" 
+                                        dd is a class file to be analyzed
+                                        dt "directory/"
+                                        dd is a directory recursivly searched for jar and class files
 
         script(type="text/javascript").
             breadcrumbs = [['Labs', '/labs/'], ['Embedded Vulnerability Detector', '/labs/victims/']];
