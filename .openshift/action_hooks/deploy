@@ -5,4 +5,4 @@
 # ruby, etc.
 
 
-cp -f $OPENSHIFT_REPO_DIR/.openshift/config/truststore.jks  ${OPENSHIFT_JBOSSEAP_DIR}/standalone/configuration
+#cp -f $OPENSHIFT_REPO_DIR/.openshift/config/truststore.jks  ${OPENSHIFT_JBOSSEAP_DIR}/standalone/configuration
